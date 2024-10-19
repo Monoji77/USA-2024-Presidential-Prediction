@@ -1,10 +1,9 @@
 ---
-title: "My title"
-subtitle: "My subtitle if needed"
+title: "USA pollster"
+subtitle: "CHANGE SUBTITLE"
 author: 
-  - First author
-  - Another author
-thanks: "Code and data are available at: [https://github.com/RohanAlexander/starter_folder](https://github.com/RohanAlexander/starter_folder)."
+  - Chris Yong Hong Sen
+thanks: "Code and data are available at: [https://github.com/Monoji77/USA-pollster](https://github.com/Monoji77/USA-pollster)."
 date: today
 date-format: long
 abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
@@ -20,6 +19,7 @@ bibliography: references.bib
 
 library(tidyverse)
 library(palmerpenguins)
+library(knitr)
 ```
 
 
@@ -197,7 +197,54 @@ Weaknesses and next steps should also be included.
 # Appendix {-}
 
 
-# Additional data details
+# Patriot Polling: Wisconsin Presidential Analysis Data Collection 
+
+## Methodology
+From 12 to 14 October 2024, Patriot Polling has conducted phone surveys in the state of Wisconsin of the United States of America, which borders Minnesota, Iowa, Michegan, and Illinois. Their target population are voters in Wisconsin. For sample of landlines which are characterised by households, an equal number of phone numbers are randomly selected across every landline block in Wisconsin using Random Digit Dialing (RDD). As for the sample of mobile numbers, which are characterised by an individual with access to a digital mobile device, the sample was purchased from a consumer contact number database. For this poll, a total of 803 respondents has completed the survey either from contact through the landline or their personal contact number. [@patriotPollingMethodology]
+
+@patriotPollingMethodology conducted polling in such a way where a randomly contacted respondent would hear pre-recorded voice messages and users are able to interact with the automated phone system. This system is called Interactive voice response (IVR) which can handle outbound calls more systematically since the same questions would be asked sequentially in the survey. There were only 2 questions that were asked. Both questions begin with 'How will you vote for president?'. This is followed by the candidates name as it appears in the voting ballot.
+
+## Strengths
+This automated method of phone surveys is a lot more convenient and efficient than in person type of surveys since it removes the need for a surveyor to visit respondents face to face and also removes the need for a surveyor to contact multiple respondents over the phone. This decreases labour effort and cost. 
+
+Furthermore, with real-time feedback from phone surveys, the list of questions can be easily and quickly adjusted to ensure the ethical integrity of the survey being conducted. According to @patriotPollingMethodology, this survey took place in 2 daysm which could have taken a lot longer if other in-person type of surveying methods were used in this research. 
+
+Particularly, the polling company used a repertoire of RDD sampling and stratified sampling on landlines to ensure that every landline block (strata) has equal numbers of respondents to be included in the final sample. This helps to ensure diversity from the sample by including different geographical landline blocks, reducing sampling bias. The purchasing of mobile phones from phone number databases abates sampling bias in areas where a particular demographic - younger people who are fully dependant on mobile phones and not landlines - would otherwise be underrepresented if only RDD sampling was conducted on landlines.  
+
+
+## Limitations and weakness
+Firstly, there was a lack of information regarding how RDD was performed for the landline sample, how they handled non-working landlines, as well as the total sample size attributed from landline and mobile phone surveys. 
+
+The handling of no-response entities were also not explicitly mentioned by Patriot Polling. This could translate to respondents who were chosen but did not pick up their mobile phones/landlines as it was a busy period in the day or due to potential heightened awareness of phone based scams. This means that the final sample obtained might not be representative of the Wisconsin voter population.
+
+Also, the initial phrasing to the second question can very easily confuse respondents. Although the initial phrasing is followed by the senate candidate's name, the initial phrasing 'How will you vote for president' still uses the wrong word 'president' instead of 'senate'. This does not reflect a high quality survey, which could lead to decreased trust from the respondent to Patriot Polling, in turn potentially resulting in a premature end to the surveys, voiding the initial response.
+
+Lastly, the purchasing of phone numbers from a consumer database would introduce of selection bias. Individuals from middle to higher socio-economic status would have greater purchasing power than their lower income counterparts, which means individuals from lower socio-economic status may not have phones. In addition, elderlies within Wisconsin may not necessarily have mobile phones due to the lack of skills to use such technologies. Also, individuals would've opted for do-not-call registries, opted out of marketing databases or simply have prepaid phones which do not link to their personal information. This could mean an under representation of individuals from the said groups.
+
+
+```{r senate they voted for}
+#| label: tbl-senate
+#| include: false
+#| echo: false
+#| layout-ncol: 2
+#| fig-cap: "Presidental Candidates Votes"
+#| fig-subcap: ["Percentage of votes for senate candidates in Wisconsin", "Percentage of votes for presidential candidates in Wisconsin"]
+
+
+presidential_voter_table <- tibble(
+  'Presidential Candidate'= c('Donald Trump (R)', 'Kamala Harris (D)'),
+  'Registered Voters'= c('50%', '49%'),
+)
+senate_voter_table <- tibble(
+  'Senate Candidate'= c('Tammy Baldwin (R)', 'Eric Hovde (D)'),
+  'Registered Voters'= c('50%', '49%'),
+)
+
+kable(presidential_voter_table) 
+kable(senate_voter_table)
+```
+
+
 
 # Model details {#sec-model-details}
 
