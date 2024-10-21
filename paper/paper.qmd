@@ -204,15 +204,15 @@ From 12 to 14 October 2024, Patriot Polling has conducted phone surveys in the s
 
 @patriotPollingMethodology conducted polling in such a way where a randomly contacted respondent would hear pre-recorded voice messages and users are able to interact with the automated phone system. This system is called Interactive voice response (IVR) which can handle outbound calls more systematically since the same questions would be asked sequentially in the survey. There were only 2 questions that were asked. Both questions begin with 'How will you vote for president?'. This is followed by the candidates name as it appears in the voting ballot.
 
-## Strengths
+## Strengths {#sec-WisconsinStrengths}
 This automated method of phone surveys is a lot more convenient and efficient than in person type of surveys since it removes the need for a surveyor to visit respondents face to face and also removes the need for a surveyor to contact multiple respondents over the phone. This decreases labour effort and cost. 
 
-Furthermore, with real-time feedback from phone surveys, the list of questions can be easily and quickly adjusted to ensure the ethical integrity of the survey being conducted. According to @patriotPollingMethodology, this survey took place in 2 daysm which could have taken a lot longer if other in-person type of surveying methods were used in this research. 
+Furthermore, with real-time feedback from phone surveys, the list of questions can be easily and quickly adjusted to ensure the ethical integrity of the survey being conducted. According to @patriotPollingMethodology, this survey took place in 2 days which could have taken a lot longer if other in-person type of surveying methods were used in this research. 
 
 Particularly, the polling company used a repertoire of RDD sampling and stratified sampling on landlines to ensure that every landline block (strata) has equal numbers of respondents to be included in the final sample. This helps to ensure diversity from the sample by including different geographical landline blocks, reducing sampling bias. The purchasing of mobile phones from phone number databases abates sampling bias in areas where a particular demographic - younger people who are fully dependant on mobile phones and not landlines - would otherwise be underrepresented if only RDD sampling was conducted on landlines.  
 
 
-## Limitations and weakness
+## Limitations and weakness {#sec-WisconsinWeaknesses}
 Firstly, there was a lack of information regarding how RDD was performed for the landline sample, how they handled non-working landlines, as well as the total sample size attributed from landline and mobile phone surveys. 
 
 The handling of no-response entities were also not explicitly mentioned by Patriot Polling. This could translate to respondents who were chosen but did not pick up their mobile phones/landlines as it was a busy period in the day or due to potential heightened awareness of phone based scams. This means that the final sample obtained might not be representative of the Wisconsin voter population.
@@ -244,11 +244,112 @@ kable(presidential_voter_table)
 kable(senate_voter_table)
 ```
 
+# Idealised methodology for presidential election forecasting
+
+## Context of presidential election
+US General elections runs every 4 years. The current state of the US electoral system is a two-party system where the republican and democratic parties dominate the political space [@USPresidentialcontext]. During general elections, eligible voters in America are actually voting for a group of people called electors within their state. Elector candidates from 38 out of 50 states are usually pledged to support a specific political party. While there had been 'faithless electors' who cast a vote to the opposing party, they account for lesser than 1% of the elector population from the past 58 presidential elections. 'Faithless electors' had never affected the outcome of the elections [@FaithlessElectors]. If a elector candidate receives majority of votes by voters in their state, they gain the privilege of all electoral votes allocated for that state. All electors make up the electoral college. The electoral college would then casts their votes to their preferred presidential nominee, for which the majority would determine who becomes president. 
+
+## Split electoral votes in Nebraska and Maine {#sec-NebraskaMaine}
+In the states of Nebraska and Maine, individuals are voting not at the state level, but at the congressional district level. Nebraska has 3 districts while Maine has 2. One elector is chosen for each congressional district, and an additional 2 electors is given for the statewide majority. Unlike the other states which operate on a winner-takes-all, this difference in voting allows for greater variation in the outcome of the general elections [@Maine&NebraskaEdgeCase].   
+
+## Idealised methodology: Pilot 
+The purpose of a pilot testing is to ensure a well-designed election forecasting survey. Due to the nature of the general election characterised by the votes of the electoral college, random sampling has to be performed across all 50 states of America. \$5,000 should go towards a pilot test obtaining 200 respondents. This pilot test would target battleground states such as Wisconsin as well as Maine and Nebraska to test specific issues around a split vote between the two presidential candidate. Begin by using stratified sampling that divides each state population into strata by various socio demographic factors (e.g. gender, highest educational attainment, race, income), then conduct systematic random sampling within each strata. An optional \$5 digital or mailed voucher can be used to incentivise respondents to complete the survey.    
+
+Respondents should be recruited quickly using by random digit dialing (RDD) to reduce selection bias. Firstly, obtain the list of possible area codes corresponding to the first 6 digits of a contact number within a state. Then randomly sample the remaining 4 digits. Coupled with the use of an automated interactive voice response system, this would increase efficiency while taking note of non-response from either premature end to phone surveys or non-working landlines/phonelines. This also decreases response bias as unlisted contact numbers would be included in the sampling frame as well. Theoretically, a larger than expected sample has to be recruited in order to account for contact numbers that are not in use. Also, it is important to distinguish landline RDD sampling and cellphone RDD sampling as they represent different communties within the population as mentioned in @sec-WisconsinStrengths and @sec-WisconsinWeaknesses
+
+As for the contents of the phone survey, begin by providing detailed, succint information. We would introduce our company name, the purpose of the phone survey, and how only their polling preference is recorded and how their contact information would be used (but not saved) for the optional voucher redeeming purposes. If the phone survey is conducted in the first congressional district of Maine, explicitly mention that this survey is used to obtain polling preferences among voters within the first congressional district of Maine, and there are no political affiliations. It is paramount to obtain consent from the respondent. Therefore, have an option to let a respondent opt out of the survey without any form of discrimination. If a respondent chooses to continue the survey, we can ask them for their highest educational background, race, gender and/or other socio demographic information with the option to indicate non-response for any particular question. If a respondent successfully completes the phone survey, record the information into a secure, password protected excel sheet for further data analysis. It is also important to honor the incentives should the respondent complete the survey by using only the phone number. At the end, thank the respondent for their coorperative participation.
+
+In order to expand the sampling frame to include voters who may not prefer to do a phone surveys, we can conduct a Google forms survey as well which is free of charge. The format of the form should mimic that of the RDD random sampling method explained in the paragraph before this.   
+
+After obtaining all pilot samples, validate the pilot data by checking for any patterns or outliers. In particular, we have to pay special attention to ensure that the samples received are balanced and representive of the voting population in that particular state by cross referencing to census data available from IPUMS US census data [@USACensusData]. If the data is not representive of a particular population, it might be necessary to conduct in person surveys in regions of the state where certain demographics are underrepresented.  
+These forms of recruiting respondents should mimic the actual sampling conducted on a larger scale after a successful pilot.  
+
+## Idealised methodology: Large scale sampling
+By refining our phone surveys and google form surveys, we can expand the surveys to all states in America. For the states of Nebraska and Maine, we will be performing both analysis for individual congressional districts and statewide majority votes to determine the number of estimated electoral votes as described in @sec-NebraskaMaine. Particularly for all battleground states as seen from the past 2020 elections like Arizona, Florida and Maine's second congressional district, we will be oversampling to ensure that the preferences of sampled voters are better representive of the overall voter population in their particular state or congressional district, leading to reduced sampling error and more precise forecasting of the presidential elections. 
+
+If the pilot discovers regions where certain demographics are underrepresented (e.g. poorer communities without digital communication devices nor landlines), surveyors would have to be employed in these regions to obtain samples directly.  
+
+Ultimately, the algorithm to forecast the presidential winner involves obtaining the majority vote based on samples obtained within each state (and districts in Nebraska and Maine). Then based on the  number of electors assigned to that region, we will sum up the number of electors affiliated to the presidential candidates. This sum divided by the 538 total electors would be the predicted probability that a presidential candidate would win in the upcoming election.
+
+## Presentation of polling results
+We can map out the results to give a visual representation of how the votes mapped out to each state. @fig-hypotheticalvisualisation-1 provides a quick overview to an estimated presidential candidate preference in each state in America from the obtained samples. The colour distinction makes it quickly identifiable the majority within each state. @fig-hypotheticalvisualisation-2 provides the final predicted probability of how likely a party (presidential candidate) would be elected president. The following map utilises data obtained from Cook Political Report [@US2020mapdata]. Tigris library [@tigrisCitation] coupled with tidyverse library [@tidyverseReference] was used to generate the US map shown in @fig-hypotheticalvisualisation-1. Tidyverse library was also used to generate the bar chart shown in @fig-hypotheticalvisualisation-2.
+
+```{r map of US votes}
+#| echo: false
+#| eval: true
+#| message: false
+#| warning: false
+#| label: fig-hypotheticalvisualisation
+#| fig-cap: "Forecast of US presidential elections"
+#| fig-subcap: ["Map forecast", "Overall forecast"]
+#| layout-ncol: 2
+
+
+#####################################
+# plot 1: map of forecasted elections
+#
+#####################################
+library(tigris) # obtaining geographical data for USA
+options(tigris_use_cache = TRUE)
+
+
+votes_in_2020 <- read_csv('../data/01-raw_data/us_2020_votes.csv')
+
+us_states <- states(cb = TRUE, resolution = '20m') |> #
+  filter(NAME != 'Puerto Rico') |>
+  shift_geometry() |>
+  left_join(votes_in_2020, 
+            by = c('NAME' = 'state'))
+
+us_states |>
+  ggplot(mapping = aes(fill = called)) + 
+  geom_sf(color='white', lwd=0.5) +
+  theme_void() +
+  scale_fill_manual(
+    values = c('D' = 'skyblue3', 'R' = 'indianred3'),
+    labels = c('D'='Democrat','R'='Republican')) +
+  labs(fill='Party',
+       caption='Note: Maine and Nebraska are not operating under winner-takes-all',
+       title='2024 US Presidential Election Forecast')
+
+###########################
+# plot 2: Bar chart
+#
+###########################
+hypothetical_outcome <- tibble(
+  'party' = c('Democrat', 'Republican'),
+  'perc_electoral_votes' = c(51, 49)
+)
+
+label_y <- hypothetical_outcome$perc_electoral_votes / 2
+text_label_y <- paste0(label_y, '%')
+
+hypothetical_outcome |>
+  ggplot(aes(x=party, y=perc_electoral_votes)) +
+  geom_col(mapping = aes(fill = party), show.legend = FALSE) +
+  geom_text(aes(y=label_y, 
+                label=paste0(perc_electoral_votes, '%')), 
+            colour = 'white', size=15) +
+  theme(
+    axis.text.x = element_text(size=15),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.background = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks = element_blank(),
+    axis.title = element_blank()
+  ) +
+  labs(
+    title = 'Forecasted probability for Republican and Democrats'
+  ) +
+  scale_fill_manual(
+    values = c('skyblue3', 'indianred3'))
+```
 
 
 # Model details {#sec-model-details}
 
-## Posterior predictive check
+## Posterior predictive checks
 
 In @fig-ppcheckandposteriorvsprior-1 we implement a posterior predictive check. This shows...
 
