@@ -1,3 +1,4 @@
+
 ---
 title: "Tight battle between republicans and democrats with Kamala in the lead"
 subtitle: "Pollsters in America are suggesting that Americans prefer Kamala as president"
@@ -22,10 +23,8 @@ bibliography: references.bib
 library(tidyverse)
 library(knitr)
 library(kableExtra)
-data <- read_csv("../data/02-analysis_data/analysis_data.csv")
-
+#data <- read_csv("../data/02-analysis_data/analysis_data.csv")
 just_harris_high_quality <- read_csv("../data/02-analysis_data/analysis_data_harris.csv")
-
 just_trump_high_quality <- read_csv("../data/02-analysis_data/analysis_data_trump.csv")
 ```
 
@@ -422,7 +421,7 @@ These augmented datasets allowed for a comprehensive comparison of predicted ver
 To model the polling percentages for Kamala Harris and Donald Trump, we used multiple linear regression to estimate the relationship between polling percentages (pct) and several predictors, including the poll’s end date, pollster quality, and pollster organization. This section provides a detailed breakdown of how we constructed the models, including the selection of predictors and the data processing steps taken to ensure that the models capture meaningful patterns.
 
 
-**Data Preparation**
+## Data Preparation
 
 The data used for modeling included high-quality election polling data for both Kamala Harris and Donald Trump. The data was filtered to include only polls that met a quality threshold (numeric_grade >= 2.5), ensuring that the analyses are based on reliable information. This threshold was chosen based on an examination of pollster ratings, and it helped exclude lower-quality polls that might introduce noise into the analysis.
 
@@ -436,7 +435,7 @@ The key variables used in the models were:
 - **pollster:** The polling organization conducting the poll. This categorical variable was included in Model 2 to account for differences between pollsters in methodology, sampling, or potential biases.
 
 
-**Feature Selection**
+## Feature Selection
 
 We used the following predictors to model the polling percentage (pct) for both candidates:
 
@@ -450,7 +449,7 @@ We used the following predictors to model the polling percentage (pct) for both 
 - In Model 2, the pollster variable was included as a categorical factor. This allows us to control for differences among polling organizations, which may have distinct methodologies, levels of accuracy, or biases. For instance, some pollsters might consistently report higher or lower percentages for specific candidates, and including this factor helps mitigate those effects.
 
 
-**Model Training and Prediction**
+## Model Training and Prediction
 
 - Model 1 was fitted to predict pct as a function of end_date, transparency_score, and numeric_grade. This model helps in understanding the general trends in candidate support, while adjusting for the quality of the polls included.
 - Model 2 added pollster as an additional predictor, creating a richer model that accounts for differences between polling agencies. The inclusion of pollster captures variability related to different polling methodologies or inherent pollster biases.
@@ -460,7 +459,7 @@ We used the following predictors to model the polling percentage (pct) for both 
 - Model 2 Predictions (fitted_date_pollster) additionally included the effect of each pollster, providing a more nuanced estimate that adjusts for pollster-level effects.
 
 
-**Model Assumptions**
+## Model Assumptions
 
 The following assumptions underlie the multiple linear regression models used:
 
@@ -473,7 +472,7 @@ The following assumptions underlie the multiple linear regression models used:
 These assumptions are crucial for ensuring that the model coefficients are unbiased and that the predictions are meaningful.
 
 
-**Cross-Validation and Overfitting Prevention**
+## Cross-Validation and Overfitting Prevention
 
 To evaluate the robustness of our models, a train-test split was applied. The training data was used to fit the model, while the test data (which the model had not seen during training) was used to evaluate model performance. This approach helps in identifying overfitting, ensuring that the model can generalize beyond the specific dataset used for training.
 
@@ -484,7 +483,7 @@ For future improvements, we could explore the use of cross-validation for furthe
 The choice of multiple linear regression models for predicting the polling support of Kamala Harris and Donald Trump is driven by several key considerations regarding the nature of the data and the objectives of the analysis. Below, we provide a detailed justification for the chosen models and predictors, discuss the reasoning behind the modeling choices, and address limitations and alternatives considered during the process.
 
 
-**Why Multiple Linear Regression?**
+## Why Multiple Linear Regression?
 
 **Multiple linear regression (MLR)** was selected as the modeling framework due to its ability to estimate relationships between multiple predictors and a continuous outcome variable—in this case, the percentage of voter support (pct). MLR provides a straightforward approach to quantify the impact of each predictor on polling percentages, allowing us to make inferences about the strength and direction of these relationships.
 
@@ -500,7 +499,7 @@ The primary motivations for using multiple linear regression in this context inc
 - We built identical models for both Kamala Harris and Donald Trump, allowing for a side-by-side comparison of their polling trends over time. This consistency enables a clearer understanding of differences in support and trends across the two candidates.
 
 
-**Why These Specific Predictors?**
+## Why These Specific Predictors?
 
 **1.End Date (end_date):**
 - The end date of polling is an essential predictor, as it captures temporal effects. Polling percentages often change over the course of a campaign due to events, news, and other dynamic factors. Including end_date helps us understand how support evolves over time.
@@ -514,13 +513,13 @@ The primary motivations for using multiple linear regression in this context inc
 - Including pollster allows the model to adjust for these variations, thereby improving the accuracy of the predictions.
 
 
-**Justification for Model Complexity**
+## Justification for Model Complexity
 
 - **Model 1** is kept relatively simple, using end_date, transparency_score, and numeric_grade as predictors. This model is useful for understanding the general trend in polling support while accounting for poll quality.
 - **Model 2** adds complexity by including the pollster (pollster) as a categorical predictor. This accounts for pollster-specific effects and helps to improve model accuracy by recognizing that different pollsters may report systematically different results. Given that different polling organizations use distinct methodologies, including this variable ensures that biases are appropriately adjusted.
 
 
-**Limitations of the Models**
+## Limitations of the Models
 
 **1.Assumptions of Linearity and Normality:**
 - The linear models assume that the relationship between predictors and the outcome is linear, and that the residuals are normally distributed. In reality, polling data may not always satisfy these assumptions, especially if there are non-linear trends in voter support or heavy-tailed distributions in the errors.
@@ -535,7 +534,7 @@ The primary motivations for using multiple linear regression in this context inc
 - Polls conducted by the same pollster over time might not be entirely independent, leading to autocorrelation in the data. While Model 2 partially addresses this by including pollster as a fixed effect, a more complex model (e.g., hierarchical or Bayesian) could better capture these dependencies.
 
 
-**Alternatives Considered**
+## Alternatives Considered
 
 **1.Logistic Regression:**
 - Logistic regression was considered as an alternative, but it was ultimately deemed unsuitable because the outcome variable (pct) is continuous, rather than binary. Logistic regression is appropriate for classification tasks where the outcome is binary (e.g., win or lose), but our goal is to predict support percentages, making multiple linear regression a more appropriate choice.
@@ -547,7 +546,7 @@ The primary motivations for using multiple linear regression in this context inc
 - An additional layer of complexity that could be added to the model is the inclusion of state-level effects to capture geographical variations in polling support. State-level data was available, but due to concerns over sample size in certain states, we opted not to include state as a random effect in this version of the models. Future iterations could explore adding a random effect for state to account for regional differences.
 
 
-**Evaluation Metrics**
+## Evaluation Metrics
 
 The models were evaluated based on:
 
@@ -555,7 +554,7 @@ The models were evaluated based on:
 - **Cross-Validation:** We used a train-test split to ensure that the model generalizes well to unseen data. This helps prevent overfitting, where the model might otherwise perform well on training data but poorly on new observations.
 
 
-**Summary**
+## Summary
 
 Our modeling approach leverages multiple linear regression to capture the relationship between polling percentages and various time, quality, and methodological factors. By fitting separate models for Kamala Harris and Donald Trump, we are able to compare and contrast their polling trends while accounting for pollster quality and potential biases. The inclusion of pollster in Model 2 allows us to control for variability between polling organizations, enhancing the accuracy of the model’s predictions.
 
@@ -573,44 +572,213 @@ Our results are summarized in @tbl-modelresults.
 
 library(rstanarm)
 
-first_model <-
-  readRDS(file = here::here("models/first_model.rds"))
+### Model data ####
+# Model 1 for Kamala: pct as a function of end_date, transparency_score and numeric_date
+model_date <- lm(pct ~ end_date + transparency_score + numeric_grade, data = just_harris_high_quality)
+
+# Model 2 for Kamala: pct as a function of end_date and pollster
+model_date_pollster <- lm(pct ~ end_date + pollster, data = just_harris_high_quality)
+
+# Augment data with model predictions
+just_harris_high_quality <- just_harris_high_quality |>
+  mutate(
+    fitted_date = predict(model_date),
+    fitted_date_pollster = predict(model_date_pollster)
+  )
+
+# Model 1 for Trump: pct as a function of end_date, transparency_score and numeric_date
+model_date_trump <- lm(pct ~ end_date  + transparency_score + numeric_grade, data = just_trump_high_quality)
+
+# Model 2 for Trump: pct as a function of end_date and pollster
+model_date_pollster_trump <- lm(pct ~ end_date + pollster, data = just_trump_high_quality)
+
+# Augment Trump data with model predictions
+just_trump_high_quality <- just_trump_high_quality |>
+  mutate(
+    fitted_date = predict(model_date_trump),
+    fitted_date_pollster = predict(model_date_pollster_trump)
+  )
+
+# Extract key metrics for Model 1 (Harris and Trump)
+metrics_model_1 <- tibble(
+  Candidate = c("Kamala Harris", "Donald Trump"),
+  R_squared = c(summary(model_date)$r.squared, summary(model_date_trump)$r.squared),
+  Adj_R_squared = c(summary(model_date)$adj.r.squared, summary(model_date_trump)$adj.r.squared),
+  AIC = c(AIC(model_date), AIC(model_date_trump)),
+  RMSE = c(sqrt(mean(residuals(model_date)^2)), sqrt(mean(residuals(model_date_trump)^2)))
+)
+
+# Create a table of metrics for Model 1
+knitr::kable(metrics_model_1, caption = "Key Metrics for Harris's and Trump's Model 1")
+
+```
+## Key Metrics for Model 1
+
+Table 5 presents the key metrics for Model 1, which served as a baseline analysis for polling percentages for Kamala Harris and Donald Trump. The R-squared values are relatively low for both candidates, at 0.07 for Harris and 0.14 for Trump, indicating that this simple model explained only a small proportion of the variance in polling percentages. The AIC values were 4926.19 and 5053.99 for Harris and Trump respectively, with similar RMSE values around 4, suggesting limited predictive power. This baseline model was used to establish a simple trend before moving to a more comprehensive model that accounts for additional variability.
+```{r}
+#| echo: false
+#| eval: true
+#| label: Summary Statistics for Donald Trump
+#| tbl-cap: "Summary Statistics for Donald Trump"
+#| warning: false
+library(modelsummary)
+library(knitr)
+summary_trump_model_2 <- summary(model_date_pollster_trump)
+significant_trump_model_2 <- as.data.frame(summary_trump_model_2$coefficients) %>%
+  filter(`Pr(>|t|)` < 0.05)
+
+# Create a trimmed-down summary table using kable
+knitr::kable(significant_trump_model_2, caption = "Significant Predictors in Trump's Model 2")
 ```
 
 ```{r}
 #| echo: false
 #| eval: true
-#| label: tbl-modelresults
-#| tbl-cap: "Explanatory models of flight time based on wing width and wing length"
+#| label: Summary Statistics for Kamala Harris
+#| tbl-cap: "Summary Statistics for Kamala Harris"
 #| warning: false
+library(modelsummary)
+library(knitr)
+summary_harris_model_2 <- summary(model_date_pollster)
+significant_harris_model_2 <- as.data.frame(summary_harris_model_2$coefficients) %>%
+  filter(`Pr(>|t|)` < 0.05)
 
-modelsummary::modelsummary(
-  list(
-    "First model" = first_model
-  ),
-  statistic = "mad",
-  fmt = 2
-)
+# Create a trimmed-down summary table using kable
+knitr::kable(significant_harris_model_2, caption = "Significant Predictors in Harris's Model 2")
 ```
 
+## Significant Predictors in Model 2
 
+Table 6 and Table 7 present the summary statistics for Model 2 for Donald Trump and Kamala Harris respectively. The second model extends the baseline model by including pollster-specific effects, which significantly improves its predictive capabilities.
 
+For Donald Trump, significant predictors include end_date (estimate = 0.0206, p < 0.001), which shows that his polling percentage tends to increase slightly over time. Specific pollsters like Ipsos (estimate = 5.39, p < 0.001) and MassINC Polling Group (estimate = 8.88, p < 0.001) show considerable effects, indicating variability in results due to the polling organization.
+
+For Kamala Harris, end_date is also significant (estimate = 0.0129, p = 0.0015), suggesting a positive trend over time. Notable pollster effects include MassINC Polling Group (estimate = 7.70, p < 0.001) and University of Maryland/Washington Post (estimate = 14.62, p < 0.001), indicating significant variability in the polling results reported by different organizations.
+
+```{r}
+#| echo: false
+#| eval: true
+#| label: Polling Prediction Outcome
+#| tbl-cap: "Polling prediction Outcome"
+#| warning: false
+# Plot model predictions for Trump
+# Combine the datasets for Trump and Harris, keeping their respective predictions
+combined_data_with_preds <- bind_rows(
+  just_harris_high_quality |> mutate(candidate = "Kamala Harris"),
+  just_trump_high_quality |> mutate(candidate = "Donald Trump")
+)
+
+# Plotting the model predictions for both Trump and Harris in one chart
+ggplot(combined_data_with_preds, aes(x = end_date, y = pct)) +
+  # Actual data points with transparency
+  geom_point(aes(color = candidate), alpha = 0.5) +
+  
+  # Predicted lines for each candidate
+  geom_line(data = combined_data_with_preds |> filter(candidate == "Kamala Harris"),
+            aes(y = fitted_date_pollster, color = candidate), linetype = "solid", size = 1) +
+  geom_line(data = combined_data_with_preds |> filter(candidate == "Donald Trump"),
+            aes(y = fitted_date_pollster, color = candidate), linetype = "solid", size = 1) +
+  
+  # Set colors manually for better distinction
+  scale_color_manual(values = c("Kamala Harris" = "blue", "Donald Trump" = "red")) +
+  
+  # Add labels and theme
+  labs(
+    x = "Polling End Date ",
+    y = "Polling Percentage",
+    title = "Polling Predictions for Kamala Harris and Donald Trump",
+    color = "Candidate"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+# Plotting the smoothed predictions for both Trump and Harris
+ggplot(combined_data_with_preds, aes(x = end_date, y = pct)) +
+  # Actual data points with transparency
+  geom_point(aes(color = candidate), alpha = 0.3) +
+  
+  # Smoothed lines for each candidate
+  geom_smooth(aes(color = candidate), method = "loess", span = 0.2, se = FALSE, size = 1.2) +
+  
+  # Set colors manually for better distinction
+  scale_color_manual(values = c("Kamala Harris" = "blue", "Donald Trump" = "red")) +
+  
+  # Add labels and theme
+  labs(
+    x = "Polling End Date",
+    y = "Polling Percentage",
+    title = "Smoothed Polling Predictions for Kamala Harris and Donald Trump",
+    color = "Candidate"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+
+## Visual Representation of Model Predictions
+
+Figure 1 and Figure 2 depict the predicted polling percentages for both candidates over time based on Model 2. The solid lines represent the smoothed predictions for Kamala Harris (blue) and Donald Trump (red). The visualizations reveal that both candidates maintain relatively stable trends, with some fluctuation, particularly influenced by pollsters and specific dates.
+
+The smoothed polling predictions in Figure 2 indicate that Kamala Harris tends to have a slightly higher polling percentage compared to Donald Trump, with less fluctuation over the observed period. This suggests that her polling results are more consistent across different pollsters and dates.
+
+## Summary
+
+The results indicate that while both candidates’ polling percentages are influenced by factors such as pollster-specific effects and end date, Kamala Harris shows more consistent support over time. The extended Model 2 provided better explanatory power compared to the baseline Model 1, as reflected in the inclusion of pollster effects that help explain the observed variability in polling data.
 
 # Discussion
 
-## First discussion point {#sec-first-point}
+## Key Findings
 
-If my paper were 10 pages, then should be be at least 2.5 pages. The discussion is a chance to show off what you know and what you learnt from all this. 
+This paper provides a forecast for the 2024 U.S. Presidential Election between Kamala Harris and Donald Trump, leveraging linear regression models applied to recent polling data. The analysis projects Kamala Harris as the leading candidate, with consistent support across various polls and polling organizations, suggesting her potential to win the upcoming election.
 
-## Second discussion point
+Model 1, which included basic predictors like end date, transparency score, and numeric grade, demonstrated limited explanatory power, with R-squared values of 0.07 for Harris and 0.14 for Trump. However, Model 2, which introduced pollster-specific effects, provided better insights into the variability in polling percentages.
 
-Please don't use these as sub-heading labels - change them to be what your point actually is.
+The smoothed polling predictions (Figure 2) clearly showed that Harris is ahead of Trump throughout the analyzed period. This consistent lead, combined with higher polling percentages reported by major polling organizations such as MassINC Polling Group and University of Maryland/Washington Post, indicates Harris’s current advantage heading toward the election.
 
-## Third discussion point
+## Pollster Impact and Voter Sentiment
 
-## Weaknesses and next steps
+Pollster-specific effects played a substantial role in the reported polling outcomes. For Kamala Harris, significant pollster effects included organizations like MassINC Polling Group and University of Maryland/Washington Post, which reported notably higher polling percentages for Harris. This suggests that certain polling organizations may have a favorable sampling bias or different methodologies that influence their reported results.
 
-Weaknesses and next steps should also be included.
+Similarly, Donald Trump also saw significant variability across pollsters. Notably, Ipsos and MassINC Polling Group were among those reporting significantly higher polling percentages for Trump. These pollster-specific biases suggest the importance of accounting for the polling organization when analyzing election forecasts.
+
+## Regional Analysis and Swing States
+
+The regional analysis highlighted in swing states shows varying degrees of support for both candidates, with some states showing Harris in the lead and others favoring Trump. Notable swing states like Arizona and Pennsylvania displayed significant variation, with Harris maintaining a narrow lead in some polls while Trump showed higher support in others.
+
+The combined analysis of both Harris and Trump across the swing states suggests that Harris is predicted to outperform Trump, albeit with narrow margins in key regions. This is critical for electoral success, as even slight changes in voter sentiment in swing states can have a substantial impact on the final election outcome. The projections emphasize the importance of strategic campaigning in these battleground states, where the race remains close.
+
+## Polling and Model Uncertainty
+
+The polling data used in this analysis, while indicative of current trends, introduces uncertainties due to incomplete coverage and pollster bias. The variability observed across different pollsters underscores the challenges in capturing a fully representative sample of the voting population. Certain demographic groups may be underrepresented, resulting in biased outcomes.
+
+The models assumed linear relationships between polling percentages and predictors, which may have oversimplified the complex relationships at play in voter sentiment. This linearity assumption, while useful for initial analysis, may overlook potential non-linear dynamics that can significantly affect polling outcomes, especially during dynamic campaign events or sudden shifts in public opinion.
+
+## Limitations and Weaknesses
+
+Despite the predictive capabilities of the models, several limitations should be acknowledged:
+
+1.Assumption of Linearity: The assumption of linearity restricts the model’s ability to capture non-linear shifts in voter sentiment, particularly during pivotal campaign moments. Incorporating non-linear modeling techniques could better reflect the complexity of voter behavior.
+
+2.Pollster Variability: The differences in poll results across organizations, as observed in Model 2, point to systematic biases in polling methodologies. These biases may reflect differences in sampling techniques, question wording, or demographic targeting, which can skew reported outcomes.
+
+3.Potential Polling Biases: Nonresponse bias remains a significant challenge, particularly for Trump’s support, as seen in previous election cycles. The “Shy Tory Effect” may lead to an underreporting of support for Trump, making it difficult to capture the full extent of his voter base.
+
+4.Historical Data and Recency Bias: The reliance on historical data risks the model being influenced by past trends that may not hold in the current electoral cycle. Unexpected shifts in voter sentiment, as seen in previous elections, could lead to discrepancies between the model predictions and actual outcomes.
+
+## Implications for Future Research
+
+The results of this analysis highlight areas for improvement and further research:
+
+- Non-Linear Modeling: Future research could explore the use of non-linear models or splines to capture the complexity of voter sentiment, particularly during pivotal campaign events.
+- Bayesian Methods for Dynamic Updates: Implementing a Bayesian framework would allow the model to update its predictions in real time as new polling data becomes available. This could help better capture the evolving nature of voter preferences, especially in response to major campaign developments.
+- Incorporation of Demographic Data: Including demographic information—such as age, gender, income, and education—could provide more granular insights into voter behavior and help identify which demographic groups are most influential in determining electoral outcomes.
+- Weighting Polls by Credibility: Incorporating a weighting scheme based on pollster credibility and transparency scores could help adjust for systematic biases and provide a more balanced view of the polling landscape.
+
+## Conclusion
+
+The analysis presented in this paper indicates a clear lead for Kamala Harris over Donald Trump in the 2024 U.S. Presidential Election, based on recent polling data. While the models capture broad trends in support and demonstrate the impact of polling methodology, they also emphasize the inherent uncertainty in electoral forecasting. The current projections suggest that Harris is positioned well to win, particularly if the trends observed in polling data continue. However, these results should be interpreted cautiously, acknowledging the dynamic nature of elections and the various limitations inherent in polling-based modeling.
+
+Future studies should seek to incorporate additional data sources and more sophisticated modeling techniques to better capture the complex dynamics of voter behavior, particularly in an ever-evolving political environment.
+
 
 \newpage
 
@@ -887,9 +1055,9 @@ In @fig-ppcheckandposteriorvsprior-2 we compare the posterior with the prior. Th
 #| fig-subcap: ["Trace plot", "Rhat plot"]
 #| layout-ncol: 2
 
-plot(first_model, "trace")
+#plot(first_model, "trace")
 
-plot(first_model, "rhat")
+#plot(first_model, "rhat")
 ```
 
 
@@ -898,5 +1066,3 @@ plot(first_model, "rhat")
 
 
 # References
-
-
