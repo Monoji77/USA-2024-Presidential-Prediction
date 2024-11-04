@@ -1,8 +1,10 @@
 ---
-title: "USA pollster"
-subtitle: "CHANGE SUBTITLE"
+title: "Tight battle between republicans and democrats with Kamala in the lead"
+subtitle: "Pollsters in America are suggesting that Americans prefer Kamala as president"
 author: 
   - Chris Yong Hong Sen
+  - Veyasan Ragulan
+  - Prankit Bhardwaj
 thanks: "Code and data are available at: [https://github.com/Monoji77/USA-pollster](https://github.com/Monoji77/USA-pollster)."
 date: today
 date-format: long
@@ -18,241 +20,546 @@ bibliography: references.bib
 #| message: false
 
 library(tidyverse)
-library(palmerpenguins)
 library(knitr)
+library(kableExtra)
 data <- read_csv("../data/02-analysis_data/analysis_data.csv")
-```
 
+just_harris_high_quality <- read_csv("../data/02-analysis_data/analysis_data_harris.csv")
+
+just_trump_high_quality <- read_csv("../data/02-analysis_data/analysis_data_trump.csv")
+```
 
 # Introduction
 
-Overview paragraph
+In this paper we look at polling data from 538 on the 2024 US Presidential election, specifically on Demoncratic Candidate Kamala Harris. We will construct a model that will be used to make a prediction on whether Harris wins the US Presidency
 
-Estimand paragraph
+Section 2 will outline the source of this data. Section 3 covers the model and it's parameters. Section 4 is where discussion will be made about the models predictions and how realistically they line up with current affairs. Finally, section 4 discusses any weakness and limitations that can be considered for another report.
 
-Results paragraph
-
-Why it matters paragraph
-
-Telegraphing paragraph: The remainder of this paper is structured as follows. @sec-data....
-
-
-
-
-
-
+This report was written with the assistance of R @citeR. Additionally, @tidyverseReference, and @rstanarm were used to clean the data, write models, and analyse results. The structure of this report heeds Rohan Alexander's example @tellingstories.
 # Data {#sec-data}
 
-## Overview
+The dataset provided by fivethirtyeight contains over 15000 observations across 50 variables. Each observation is a poll conducted on the 2024 US Presidential Election. Fivethirtyeight's dataset was chosen due to it's comprehensive review of polls and pollsters, attributing grades in error and bias, as well as in transparency. Their thorough investigations ensure their dataset not only contains insightful polls, but also includes as much relevant information about the polls conducted as possible. This gives us plenty of predictors when building a model that will caluclate the percentage win of either Trump or Harris.
 
-We use the statistical programming language R [@citeR].... Our data [@shelter].... Following @tellingstories, we consider...
+The dataset was read into R [@citeR], and cleaned using the R package tidyverse [@tidyverse]. Due to Kamal's late entry into the race, some polls do not have any data on her specifically. This is why we set a cut-off date at 2024/07/21, the day Kamala replaced Joe Biden as the Democratic nominee.
 
-Overview text
-
-## Measurement
-	
-Some paragraphs about how we go from a phenomena in the world to an entry in the dataset.
-
-## Predictor Variables
-
-Add graphs, tables and text. Use sub-sub-headings for each outcome variable or update the subheading to be singular.
-
-
-
-Some of our data is of penguins (@fig-bills), from @palmerpenguins.
+Fivethirtyeight includes a metric called `numeric_grade`, which combines the transparency_score and transparency score. We only included polls with a `numeric_grade` at or above 2.7. This gave us the best balance between quantity and quality. Finally, we create 2 datasets, one with polls predicting a Harris win, the other a Trump win.
 
 ```{r}
-#| label: fig-bills
-#| fig-cap: Bills of penguins
-#| echo: false
-data |>
-  select(poll_id, pollster_id, candidate_name, winner)
-ggplot(penguins, aes(x = island, fill = species)) +
-  geom_bar(alpha = 0.8) +
-  scale_fill_manual(values = c("darkorange","purple","cyan4"),
-                    guide = "none") +
-  theme_minimal() +
-  facet_wrap(~species, ncol = 1) +
-  coord_flip()
+#| include: false
+#| warning: false
+#| message: false
+
+#### Create end_date - pct base plots for Trump and Harris ####
+base_plot_kamala <- ggplot(just_harris_high_quality, aes(x = end_date, y = pct)) +
+  theme_classic() +
+  labs(y = "Harris percent", x = "Date")
+
+base_plot_trump <- ggplot(just_trump_high_quality, aes(x = end_date, y = pct)) +
+  theme_classic() +
+  labs(y = "Trump percent", x = "Date")
 ```
 
-Talk more about it.
+## Predictors
 
-And also planes (@fig-planes). (You can change the height and width, but don't worry about doing that until you have finished every other aspect of the paper - Quarto will try to make it look nice and the defaults usually work well once you have enough text.)
+### **`transparency_score`**
+
+Fivethirtyeight awards a score out of 10 to each pollster based on how informative their methodology is. Understanding the methodology of a pollster assits in understanding any errors or biases present in their findings.
 
 ```{r}
-#| label: fig-planes
-#| fig-cap: Relationship between wing length and width
+#| label: fig-transscore_harris
+#| fig-cap: As election day draws close, pollsters are wrapping up their polls and posting their predictions on who will win. The polls in this graph predict Harris' win percentage, with the average in the blue line. The dots in the graph below represent individual polls conducted in the months leading up to the election. They are coloured based on their transparency_score, which is fivethirtyeight's metric for transpareny in the pollster's methodology. 
 #| echo: false
 #| warning: false
 #| message: false
 
-analysis_data <- read_csv(here::here("data/02-analysis_data/analysis_data.csv"))
+# Color by transparency_score
+base_plot_kamala +
+  geom_point(aes(color = factor(transparency_score))) +
+  geom_smooth(color = "blue") +
+  theme(legend.position = "bottom")
 ```
 
 ```{r}
-raw_pollster_data <- read_csv('../data/01-raw_data/raw_pollster_data.csv')
+#| label: tbl-transscore_harris
+#| tbl-cap: Summary of transparency_scores amongst polls predicting a Kamala Harris win. The closer the values are to 10, the more trustworthy the predictions. 
+#| echo: false
+#| warning: false
+#| message: false
 
-raw_pollster_data |>
-  colnames()
-
-raw_pollster_data |>
-  select(party, candidate_name) |>
-  unique() |>
-  arrange(party, candidate_name)
-
-raw_pollster_data |>
-  select(party, candidate_name) |>
-  unique() |>
-  filter(grepl('Donald', candidate_name))
-
-# remove trailing time stamp
-raw_pollster_data$created_at <- sapply(strsplit(raw_pollster_data$created_at, '\\s+'), '[', 1)
-
-time_var <- c('start_date', 'end_date', 'created_at')
-
-# get day, month, year in character data type
-raw_pollster_data$month <- sapply(strsplit(raw_pollster_data$created_at, '/'), '[', 1)
-raw_pollster_data$day <- sapply(strsplit(raw_pollster_data$created_at, '/'), '[', 2)
-raw_pollster_data$year <- sapply(strsplit(raw_pollster_data$created_at, '/'), '[', 3) 
-
-# observe how year is not cleaned
-unique(raw_pollster_data$year)
-
-# correct different formats for year
-raw_pollster_data$year <- case_when(
-  raw_pollster_data$year %in% c('24', '2024') ~ 2024,
-  raw_pollster_data$year %in% c('23', '2023') ~ 2023,
-  raw_pollster_data$year %in% c('22', '2022') ~ 2022,
-  raw_pollster_data$year %in% c('21', '2021') ~ 2021,
+# Generating summary statistics for Harris
+transparency_score_harris_summary <- just_harris_high_quality %>%
+  summarize(
+    Min = min(transparency_score, na.rm = TRUE),
+    Mean = mean(transparency_score, na.rm = TRUE),
+    Median = median(transparency_score, na.rm = TRUE),
+    Max = max(transparency_score, na.rm = TRUE)
   )
 
-# check that year is cleaned
-unique(raw_pollster_data$year)
-
-raw_pollster_data <- raw_pollster_data |>
-  mutate(day = ifelse(day < '10', paste0('0', day), day),
-         month = ifelse(month < '10', paste0('0', month), month),
-         created_at = as.Date(paste(year, month, day, sep='-'))) 
-
-# get day, month, year in character data type
-raw_pollster_data$month <- sapply(strsplit(raw_pollster_data$start_date, '/'), '[', 1)
-raw_pollster_data$day <- sapply(strsplit(raw_pollster_data$start_date, '/'), '[', 2)
-raw_pollster_data$year <- sapply(strsplit(raw_pollster_data$start_date, '/'), '[', 3) 
-
-# observe how year is not cleaned
-unique(raw_pollster_data$year)
-
-# correct different formats for year
-raw_pollster_data$year <- case_when(
-  raw_pollster_data$year %in% c('24', '2024') ~ 2024,
-  raw_pollster_data$year %in% c('23', '2023') ~ 2023,
-  raw_pollster_data$year %in% c('22', '2022') ~ 2022,
-  raw_pollster_data$year %in% c('21', '2021') ~ 2021,
-  )
-
-# check that year is cleaned
-unique(raw_pollster_data$year)
-
-raw_pollster_data <- raw_pollster_data |>
-  mutate(day = ifelse(day < '10', paste0('0', day), day),
-         month = ifelse(month < '10', paste0('0', month), month),
-         start_date = as.Date(paste(year, month, day, sep='-'))) 
-
-# get day, month, year in character data type
-raw_pollster_data$month <- sapply(strsplit(raw_pollster_data$end_date, '/'), '[', 1)
-raw_pollster_data$day <- sapply(strsplit(raw_pollster_data$end_date, '/'), '[', 2)
-raw_pollster_data$year <- sapply(strsplit(raw_pollster_data$end_date, '/'), '[', 3) 
-
-# observe how year is not cleaned
-unique(raw_pollster_data$year)
-
-# correct different formats for year
-raw_pollster_data$year <- case_when(
-  raw_pollster_data$year %in% c('24', '2024') ~ 2024,
-  raw_pollster_data$year %in% c('23', '2023') ~ 2023,
-  raw_pollster_data$year %in% c('22', '2022') ~ 2022,
-  raw_pollster_data$year %in% c('21', '2021') ~ 2021,
-  )
-
-# check that year is cleaned
-unique(raw_pollster_data$year)
-
-raw_pollster_data <- raw_pollster_data |>
-  mutate(day = ifelse(day < '10', paste0('0', day), day),
-         month = ifelse(month < '10', paste0('0', month), month),
-         end_date = as.Date(paste(year, month, day, sep='-'))) 
-
-raw_pollster_data |>
-  select(start_date, end_date, created_at) |>
-  summarise(min(start_date))
-
-sum(is.na(raw_pollster_data$partisan))
-
-raw_pollster_data |>
-  filter(!is.na(state))
-  
-raw_pollster_data |>
-  select(office_type) |>
-  unique()
-
-raw_pollster_data |>
-  summarise(min(pollscore, na.rm=T), max(pollscore, na.rm=T))
-
-raw_pollster_data |>
-  summarise(min(transparency_score, na.rm=T), max(transparency_score, na.rm=T))
-
-raw_pollster_data |>
-  summarise(min(numeric_grade, na.rm=T), max(numeric_grade, na.rm=T))
-
-raw_pollster_data |>
-  summarise(min(start_date, na.rm=T), max(start_date, na.rm=T),
-            min(end_date, na.rm=T), max(end_date, na.rm=T))
+# Displaying summary
+transparency_score_harris_summary %>% 
+  kable() %>%
+  kable_styling()
 ```
 
-Talk way more about it. 
+```{r}
+#| label: fig-transscore_trump
+#| fig-cap: As election day draws close, pollsters are wrapping up their polls and posting their predictions on who will win. The polls in this graph predict Trump's win percentage, with the average in the blue line. The dots in the graph below represent individual polls conducted in the months leading up to the election. They are coloured based on their transparency_score, which is fivethirtyeight's metric for transpareny in the pollster's methodology.
+#| echo: false
+#| warning: false
+#| message: false
 
-## Predictor variables
+# Color by transparency_score
+base_plot_trump +
+  geom_point(aes(color = factor(transparency_score))) +
+  geom_smooth(color = "red") +
+  theme(legend.position = "bottom")
+```
 
-Add graphs, tables and text.
+```{r}
+#| label: tbl-transscore_trump
+#| tbl-cap: Summary of transparency_scores amongst polls predicting a Donald Trump win. The closer the values are to 10, the more trustworthy the predictions. 
+#| echo: false
+#| warning: false
+#| message: false
 
-Use sub-sub-headings for each outcome variable and feel free to combine a few into one if they go together naturally.
+# Generating summary statistics for Trump
+numeric_grade_trump_summary <- just_trump_high_quality %>%
+  summarize(
+    Min = min(transparency_score, na.rm = TRUE),
+    Mean = mean(transparency_score, na.rm = TRUE),
+    Median = median(transparency_score, na.rm = TRUE),
+    Max = max(transparency_score, na.rm = TRUE)
+  )
+
+# Display summary
+numeric_grade_trump_summary %>% 
+  kable() %>%
+  kable_styling()
+
+```
+
+### **`numeric_grade`** 
+
+A cumulative score given to pollster that combines fivethirtyeight's `pollscore` and `transparency_score`. Like `transparency_score`, we believe this metric can give us insight into potential biases in each pollster and poll, which is why it is included in our model.
+
+```{r}
+#| label: fig-numgrade_harris
+#| fig-cap: As election day draws close, pollsters are wrapping up their polls and posting their predictions on who will win. The polls in this graph predict Harris' win percentage, with the average in the blue line. The dots in the graph below represent individual polls conducted in the months leading up to the election. They are coloured based on their numeric_grade, which is fivethirtyeight's combined metric on transparency and bias/errors. 
+#| echo: false
+#| warning: false
+#| message: false
+
+# Color by transparency_score
+base_plot_kamala +
+  geom_point(aes(color = factor(numeric_grade))) +
+  geom_smooth(color = "blue") +
+  theme(legend.position = "bottom")
+```
+```{r}
+#| label: tbl-numgrade_harris
+#| tbl-cap: Summary of numeric_grades amongst polls predicting a Kamala Harris win.
+#| echo: false
+#| warning: false
+#| message: false
+
+# Generating summary statistics for Harris
+numeric_grade_harris_summary <- just_harris_high_quality %>%
+  summarize(
+    Min = min(numeric_grade, na.rm = TRUE),
+    Mean = mean(numeric_grade, na.rm = TRUE),
+    Median = median(numeric_grade, na.rm = TRUE),
+    Max = max(numeric_grade, na.rm = TRUE)
+  )
+
+# Display summary
+numeric_grade_harris_summary %>% 
+  kable() %>%
+  kable_styling()
+
+```
 
 
+```{r}
+#| label: fig-numgrade_trump
+#| fig-cap: As election day draws close, pollsters are wrapping up their polls and posting their predictions on who will win. The polls in this graph predict Trumps' win percentage, with the average in the blue line. The dots in the graph below represent individual polls conducted in the months leading up to the election. They are coloured based on their numeric_grade, which is fivethirtyeight's combined metric on transparency and bias/errors. 
+#| echo: false
+#| warning: false
+#| message: false
+
+# Color by transparency_score
+base_plot_kamala +
+  geom_point(aes(color = factor(numeric_grade))) +
+  geom_smooth(color = "red") +
+  theme(legend.position = "bottom")
+```
 
 
+```{r}
+#| label: tbl-numgrade
+#| tbl-cap: Summary of transparency_scores amongst polls predicting a Donald Trump win. The closer the values are to 10, the more trustworthy the predictions. 
+#| echo: false
+#| warning: false
+#| message: false
 
+# Generating summary statistics for Trump
+numeric_grade_trump_summary <- just_trump_high_quality %>%
+  summarize(
+    Min = min(transparency_score, na.rm = TRUE),
+    Mean = mean(transparency_score, na.rm = TRUE),
+    Median = median(transparency_score, na.rm = TRUE),
+    Max = max(transparency_score, na.rm = TRUE)
+  )
 
+# Display summary
+numeric_grade_trump_summary %>% 
+  kable() %>%
+  kable_styling()
 
+```
+
+### `pollster`
+
+```{r}
+#| label: fig-pollster_harris
+#| fig-cap: As election day draws close, pollsters are wrapping up their polls and posting their predictions on who will win. The polls in this graph predict Harris' win percentage, with the average in the blue line. The dots in the graph below represent individual polls conducted in the months leading up to the election. They are coloured based on the pollster who authored the poll. 
+#| echo: false
+#| warning: false
+#| message: false
+
+# Color by transparency_score
+base_plot_kamala +
+  geom_point(aes(color = pollster)) +
+  geom_smooth(color = "blue") +
+  theme(legend.position = "bottom")
+```
+
+```{r}
+#| label: fig-pollster_trump
+#| fig-cap: As election day draws close, pollsters are wrapping up their polls and posting their predictions on who will win. The polls in this graph predict Trump's win percentage, with the average in the blue line. The dots in the graph below represent individual polls conducted in the months leading up to the election. They are coloured based on the pollster who authored the poll.  
+#| echo: false
+#| warning: false
+#| message: false
+
+# Color by transparency_score
+base_plot_trump +
+  geom_point(aes(color = pollster)) +
+  geom_smooth(color = "red") +
+  theme(legend.position = "bottom")
+```
+
+### `states`
+
+```{r}
+#| label: fig-state
+#| fig-cap: Battleground states are what usually determines the winner of a presidential election. This figure outlines the polling outcomes of each candidate from August to November, for each of the seven battleground states this election cycle.
+#| echo: false
+#| warning: false
+#| message: false
+#| 
+# Define major swing states
+swing_states <- c("Arizona", "Georgia", "Michigan", "Nevada", "North Carolina", "Pennsylvania", "Wisconsin")
+
+combined_data <- bind_rows(
+  just_harris_high_quality |> mutate(candidate = "Kamala Harris"),
+  just_trump_high_quality |> mutate(candidate = "Donald Trump")
+)
+
+# Filter data for Harris and Trump in the swing states
+swing_states_data <- combined_data |>
+  filter(state %in% swing_states)
+
+# Create a base plot for swing states data
+swing_states_plot <- ggplot(swing_states_data, aes(x = end_date, y = pct, color = candidate)) +
+  theme_minimal() +
+  labs(x = "Polling End Date", y = "Polling Percentage", title = "Polling Outcomes in Swing States") +
+  theme(legend.position = "bottom")
+
+# Facet the plot by state
+swing_states_plot +
+  geom_point(aes(shape = candidate), alpha = 0.7) +
+  geom_smooth(aes(linetype = candidate), se = FALSE) +
+  facet_wrap(vars(state)) +
+  scale_color_manual(values = c("Kamala Harris" = "blue", "Donald Trump" = "red"))
+
+```
+
+### `end_date`
+
+Every poll has a start and end date for querying its participants. Polls that are conducted closer to election day may be more reflective of American opinions as opposed to polls conducted in August or September. This is why we will be using this variable as one of our predictors in the model.
+
+```{r}
+#| label: fig-enddate_harris
+#| fig-cap: Polls are conducted from a start date to an end date. The closer the end date is to election day, the more insightful the results are to analysts and the general public. This distribution shows the end date of polls predicting a Kamala Harris win.
+#| echo: false
+#| warning: false
+#| message: false
+
+#### Plot data ####
+just_harris_high_quality %>%
+  ggplot(mapping=aes(x = end_date)) +
+  geom_histogram(fill = "blue", alpha = 0.7, color = "black",)
+```
+
+```{r}
+#| label: fig-enddate_trump
+#| fig-cap: Polls are conducted from a start date to an end date. The closer the end date is to election day, the more insightful the results are to analysts and the general public. This distribution shows the end date of polls predicting a Donald Trump win.
+#| echo: false
+#| warning: false
+#| message: false
+
+#### Plot data ####
+just_trump_high_quality %>%
+  ggplot(mapping=aes(x = end_date)) +
+  geom_histogram(fill = "red", alpha = 0.7, color = "black",)
+```
+
+# Measurement
+
+The dataset comes from fivethirtyeight.com, a statistical analysis website dedicated to US sports and elections [@fivethirtyeight]. Fivethirtyeight takes polls conducted on a particular topic (in this case the 2024 US presidency), and aggregates them in one dataset.
+
+Election polls are used to gauge public opinion about candidates, political topics, voter engagement, and public opinion of the election process. Election polls also serve as key insight to political organisations representing candidates, polls can show potential weak points across demographics.
+
+Election polls are similarly to regular polls, they involve asking a sample population a series of questions via a delivery method. The key distinction is that election polls typically try to target *voters*, or people who are most likely to vote in the election cycle being investigated. This is a key challenge to pollsters, as there are many subgroups of voters, such as people who seldom vote or never vote. According to Pew Research, a third of US citizens did not vote in the 2020 election, despite the 2020 election cycle having high voter turnout [@pew_polls]. There may also be cases when respondents of a poll reconsider whether they will vote come election day.
+
+Election polling has exploded in recent times according to Pew Research. They suggest that double there are double the amount of active pollsters in 2022 compared to 2000 [@pew_polls]. One reason mentioned is the advent of online polling, which is simple, cheap, and can easily reach US citizens across the country, compared to traditional methods such as poll by phone and mail. As a result, while the diversity of pollsters has increased dramatically, the variance in results methodology, and ethics have also increased
+
+Errors in election polling have been an issue in the last two cycles of presidential elections. Between the 2016 and 2020 elections, there has been a trend of pollsters not fully capturing Trump's support. For example in 2020, despite Biden winning the election, there were reports from the American Associcate for Public Opinion Research that national polls overstated his victory over Trump by 3.9 percentage points [@pew_polls].
+
+Fivethirty eight mitigates the influx of pollsters and the potential for errors by routinely checking up on pollsters as they produce reports. Fivethirtyeight checks every pollster, regardless of experience or prestige. There are 2 types of checks fivethirtyeight uses: Methodology and Ethics.
+
+Methodology refers to the scientific rigor exhibited by the pollster, when conducting the poll, and in the presentation of the results. Fivethirtyeight requires each poll to have or easily obtain the following [@faq538]:
+
+-   Pollster Identity
+
+-   Survey Dates
+
+-   Population Sample (Size and other distinct attributes)
+
+-   Polling Method (How was the poll conducted?)
+
+-   Sponsors (Identity and Amount
+
+Even if these conditions are met, fivethirtyeight may refuse to include certain polls in their data, due to flaws in methodology. Some examples include [@faq538]:
+
+-   Polls with inappropriate sample for target population
+
+-   Polls based upon predictive models
+
+-   Polls that implement recontact with participants (potential for bias to creep into the sample)
+
+-   Polls done by amateur/non-professional pollsters
+
+-   Polls with an "informed ballot" (when information about a candidate is given to the participant before they are asked who they would vote for)
+
+The second check fivethirtyeight implements is ethical standard, adapted from the American Association for Public Opinion Research's Code of Professional Ethics and Practices . Fivethirtyeight may refuse to include polls that [@faq538]:
+
+-   Fabricate or falsify data
+
+-   Are associated with the betting industry
+
+-   Refuse to disclose their methodology, either in their findings, or after being contacted for clarification
+
+-   Misrepresent their true purpose (being part of campaign analysis or done for a particular party or candidate)
+
+-   Disclose errors that come about from their work, and rectify them as best as possible
+
+-   Utilize methods that will give misleading results
+
+Fivethirtyeight will conduct an initial check on pollsters, seeing if their methodology and ethics are publicly available, and are in agreement with fivethirtyeight's checks. If unclear, fivethirtyeight will do a more thorough investigation of the pollster, and ask the organizers questions about their methodology and ethics if none were visible in the public report. If there are any violations in ethics, the severity on consequences will vary on what the offence is. If there is evidence of falsifying data or engaging in betting markets, the pollster is blacklisted from their data. Otherwise, pollsters are given a chance to fix ethical issues presented by fivethirtyeight. Failure to do so results in the pollster and any of its polls being taken off the dataset, but fivethirtyeight can reverse this decision if the pollster demonstrates satifactory ethics and methodology practices[@faq538].
+
+Partisan polls are a small subset of polls that are made with the backing or organizations affiliated with one or more political organizations. Fivethirtyeight will allow these polls into their data, but they will be marked as "Partisan", and extra checks are put in place to ensure the polling data hasn't been influenced unethically by the pollster or it's affiliated organizations [@faq538].
 
 # Model
 
-The goal of our modelling strategy is twofold. Firstly,...
+Our modeling strategy estimates the polling support percentages for Kamala Harris and Donald Trump during the 2024 US election campaign. To achieve this, we constructed two linear models for each candidate, aimed at understanding how their support evolves over time while accounting for variations between pollsters. The goal is to balance simplicity and interpretability, while capturing key variations in polling trends.
 
-Here we briefly describe the Bayesian analysis model used to investigate... Background details and diagnostics are included in [Appendix -@sec-model-details].
+Specifically, we consider two types of model for each candidate individually:
 
-## Model set-up
+- **Model 1**: A multiple linear regression model predicting polling percentage (pct) as a function of end_date (the date when polling concluded), transparency_score (an indicator of how transparent and reliable a poll is), and numeric_grade (an independent quality rating for pollsters).
+- **Model 2**: An extension of Model 1 that additionally includes the pollster information (pollster) to account for variability introduced by different polling organizations.
+	
+The models are built for both Kamala Harris and Donald Trump to facilitate a comparative analysis, aiming to understand their respective polling dynamics and how these vary by time, pollster quality, and polling organization.
 
-Define $y_i$ as the number of seconds that the plane remained aloft. Then $\beta_i$ is the wing width and $\gamma_i$ is the wing length, both measured in millimeters.  
-
-\begin{align} 
-y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
-\mu_i &= \alpha + \beta_i + \gamma_i\\
-\alpha &\sim \mbox{Normal}(0, 2.5) \\
-\beta &\sim \mbox{Normal}(0, 2.5) \\
-\gamma &\sim \mbox{Normal}(0, 2.5) \\
-\sigma &\sim \mbox{Exponential}(1)
+**Model 1: Linear Model by Date, Transparency Score, and Grade**	
+\begin{align}  
+y_i &= \beta_0 + \beta_1 \cdot \text{end\_date}_i + \beta_2 \cdot \text{transparency\_score}_i + \beta_3 \cdot \text{numeric\_grade}_i + \epsilon_i \\
+\epsilon_i &\sim \text{Normal}(0, \sigma^2)
 \end{align}
 
-We run the model in R [@citeR] using the `rstanarm` package of @rstanarm. We use the default priors from `rstanarm`.
+where:
 
+- $y_i$ represents the polling percentage of support for the candidate in poll $i$.
+- $beta_0$ is the intercept, representing the baseline support when all predictors are at their baseline levels.
+- $beta_1$, $\beta_2$, $\beta_3$ represent the coefficients for the predictors: end_date, transparency_score, and numeric_grade, respectively.
+- $epsilon_i$ is the error term, which is assumed to be normally distributed with variance $\sigma^2$.
+
+This model helps capture the general trend in polling support over time while adjusting for the quality of the poll itself.
+
+**Model 2: Linear Model by Date and Pollster**
+\begin{align}  
+y_i &= \beta_0 + \beta_1 \cdot \text{end\_date}_i + \gamma_{p[i]} + \epsilon_i \\
+\epsilon_i &\sim \text{Normal}(0, \sigma^2)
+\end{align}
+
+where:
+
+- $\gamma_{p[i]}$ represents the fixed effect for pollster $p$ conducting poll $i$, which captures variability across different polling organizations.
+- All other terms are as defined in Model 1.
+
+This model extends the first by considering pollster-specific differences in polling results. Different pollsters may have different methodologies or biases, which are accounted for by including pollster as a categorical variable.
+
+
+**Model Predictions and Augmentation**
+
+The models were then used to predict polling percentages, which were added to the original datasets as new columns:
+- For Kamala Harris, the predicted values (fitted_date and fitted_date_pollster) were added to the just_harris_high_quality dataset.
+- For Donald Trump, the analogous predicted values (fitted_date and fitted_date_pollster) were added to the just_trump_high_quality dataset.
+
+These augmented datasets allowed for a comprehensive comparison of predicted versus observed polling percentages, and facilitated visualization of how support for each candidate evolved over time.
+	
+## Model set-up
+
+To model the polling percentages for Kamala Harris and Donald Trump, we used multiple linear regression to estimate the relationship between polling percentages (pct) and several predictors, including the poll’s end date, pollster quality, and pollster organization. This section provides a detailed breakdown of how we constructed the models, including the selection of predictors and the data processing steps taken to ensure that the models capture meaningful patterns.
+
+
+**Data Preparation**
+
+The data used for modeling included high-quality election polling data for both Kamala Harris and Donald Trump. The data was filtered to include only polls that met a quality threshold (numeric_grade >= 2.5), ensuring that the analyses are based on reliable information. This threshold was chosen based on an examination of pollster ratings, and it helped exclude lower-quality polls that might introduce noise into the analysis.
+
+Additionally, any missing values for state were replaced with “National” to indicate that those polls were not specific to any state. This allowed us to effectively categorize national polls alongside state-level polls for the purposes of modeling.
+
+The key variables used in the models were:
+
+- **end_date:** The date on which polling concluded. This variable was treated as a continuous measure of time, capturing trends in polling over the campaign period.
+- **transparency_score:** A score reflecting the transparency of the pollster. This score was included to adjust for the quality of information provided by the polling organization.
+- **numeric_grade:** A numeric score assigned to the pollster to indicate overall quality. Higher scores indicate higher pollster reliability.
+- **pollster:** The polling organization conducting the poll. This categorical variable was included in Model 2 to account for differences between pollsters in methodology, sampling, or potential biases.
+
+
+**Feature Selection**
+
+We used the following predictors to model the polling percentage (pct) for both candidates:
+
+**1.Temporal Trend (end_date):**
+- The end date of polling was included to capture changes in candidate support over time. Including time-based effects helped account for general campaign dynamics, such as events that might influence voter opinion.
+
+**2.Pollster Quality Indicators (transparency_score and numeric_grade):**
+- These two variables represent measures of poll quality. The inclusion of transparency_score and numeric_grade allowed us to adjust for potential biases that could result from low-quality polling data. By incorporating these scores, the model effectively accounts for the fact that polls with higher transparency and quality are more reliable.
+
+**3.Pollster Organization (pollster):**
+- In Model 2, the pollster variable was included as a categorical factor. This allows us to control for differences among polling organizations, which may have distinct methodologies, levels of accuracy, or biases. For instance, some pollsters might consistently report higher or lower percentages for specific candidates, and including this factor helps mitigate those effects.
+
+
+**Model Training and Prediction**
+
+- Model 1 was fitted to predict pct as a function of end_date, transparency_score, and numeric_grade. This model helps in understanding the general trends in candidate support, while adjusting for the quality of the polls included.
+- Model 2 added pollster as an additional predictor, creating a richer model that accounts for differences between polling agencies. The inclusion of pollster captures variability related to different polling methodologies or inherent pollster biases.
+- Both models were trained using the lm() function in R, which estimates the parameters by minimizing the sum of squared residuals. The models were fit separately for Kamala Harris and Donald Trump to allow for a detailed comparison of their respective polling trends.
+- After fitting the models, predictions were made and added to the dataset for each candidate. This allowed us to compare actual polling percentages with those predicted by the models. Specifically:
+- Model 1 Predictions (fitted_date) captured the predicted polling percentage based on date and poll quality.
+- Model 2 Predictions (fitted_date_pollster) additionally included the effect of each pollster, providing a more nuanced estimate that adjusts for pollster-level effects.
+
+
+**Model Assumptions**
+
+The following assumptions underlie the multiple linear regression models used:
+
+- **Linearity:** We assume that the relationship between the predictors (end_date, transparency_score, numeric_grade, and pollster) and the outcome (pct) is linear.
+- **Independence:** Each poll is treated as an independent observation. We assume that polling percentages from different polls are not influenced by one another.
+- **Homoscedasticity:** The variance of the residuals is assumed to be constant across all levels of the independent variables.
+- **Normality of Residuals:** The error term (\epsilon_i) is assumed to be normally distributed, which is required for the validity of hypothesis testing.
+- **No Multicollinearity:** We checked that the predictors are not highly correlated, to ensure that the coefficients estimated by the models are reliable and that multicollinearity does not bias the results.
+
+These assumptions are crucial for ensuring that the model coefficients are unbiased and that the predictions are meaningful.
+
+
+**Cross-Validation and Overfitting Prevention**
+
+To evaluate the robustness of our models, a train-test split was applied. The training data was used to fit the model, while the test data (which the model had not seen during training) was used to evaluate model performance. This approach helps in identifying overfitting, ensuring that the model can generalize beyond the specific dataset used for training.
+
+For future improvements, we could explore the use of cross-validation for further robustness checks, ensuring that the model’s performance is not overly dependent on a particular train-test split.
 
 ### Model justification
 
-We expect a positive relationship between the size of the wings and time spent aloft. In particular...
+The choice of multiple linear regression models for predicting the polling support of Kamala Harris and Donald Trump is driven by several key considerations regarding the nature of the data and the objectives of the analysis. Below, we provide a detailed justification for the chosen models and predictors, discuss the reasoning behind the modeling choices, and address limitations and alternatives considered during the process.
 
-We can use maths by including latex between dollar signs, for instance $\theta$.
 
+**Why Multiple Linear Regression?**
+
+**Multiple linear regression (MLR)** was selected as the modeling framework due to its ability to estimate relationships between multiple predictors and a continuous outcome variable—in this case, the percentage of voter support (pct). MLR provides a straightforward approach to quantify the impact of each predictor on polling percentages, allowing us to make inferences about the strength and direction of these relationships.
+
+The primary motivations for using multiple linear regression in this context include:
+
+**1.Simplicity and Interpretability:**
+- Linear models offer a high degree of interpretability. Each coefficient in the model provides a clear indication of the expected change in voter support given a one-unit change in the corresponding predictor, holding all other predictors constant. This is crucial for understanding how time, poll quality, and pollster contribute to support dynamics.
+
+**2.Ability to Control for Multiple Predictors:**
+- MLR allows us to control for several influential factors simultaneously, such as time (end_date), pollster quality (transparency_score and numeric_grade), and the polling organization (pollster). By accounting for these variables, we can isolate the individual impact of each predictor and better understand the underlying factors that affect polling outcomes.
+
+**3.Comparison Between Candidates:**
+- We built identical models for both Kamala Harris and Donald Trump, allowing for a side-by-side comparison of their polling trends over time. This consistency enables a clearer understanding of differences in support and trends across the two candidates.
+
+
+**Why These Specific Predictors?**
+
+**1.End Date (end_date):**
+- The end date of polling is an essential predictor, as it captures temporal effects. Polling percentages often change over the course of a campaign due to events, news, and other dynamic factors. Including end_date helps us understand how support evolves over time.
+
+**2.Transparency Score (transparency_score) and Numeric Grade (numeric_grade):**
+- These variables were included as indicators of pollster quality. The transparency_score reflects how openly pollsters report their methods, and numeric_grade represents an independent rating of the pollster’s overall quality.
+- Including these predictors helps ensure that we account for potential biases introduced by lower-quality polls. For example, a positive coefficient on transparency_score would suggest that higher transparency is associated with higher or more reliable polling percentages for a given candidate.
+
+**3.Pollster (pollster):**
+- Pollster was included as a categorical variable in Model 2 to capture differences across polling organizations. Different pollsters have varying methodologies and biases, which can lead to systematic differences in reported polling percentages.
+- Including pollster allows the model to adjust for these variations, thereby improving the accuracy of the predictions.
+
+
+**Justification for Model Complexity**
+
+- **Model 1** is kept relatively simple, using end_date, transparency_score, and numeric_grade as predictors. This model is useful for understanding the general trend in polling support while accounting for poll quality.
+- **Model 2** adds complexity by including the pollster (pollster) as a categorical predictor. This accounts for pollster-specific effects and helps to improve model accuracy by recognizing that different pollsters may report systematically different results. Given that different polling organizations use distinct methodologies, including this variable ensures that biases are appropriately adjusted.
+
+
+**Limitations of the Models**
+
+**1.Assumptions of Linearity and Normality:**
+- The linear models assume that the relationship between predictors and the outcome is linear, and that the residuals are normally distributed. In reality, polling data may not always satisfy these assumptions, especially if there are non-linear trends in voter support or heavy-tailed distributions in the errors.
+
+**2.Potential for Omitted Variable Bias:**
+- While our models include several important predictors, there may still be unobserved factors influencing voter support that are not captured in the models. Examples include specific campaign events, candidate debates, or sudden shifts in voter sentiment.
+
+**3.Multicollinearity:**
+- The predictors transparency_score and numeric_grade both relate to poll quality and may be correlated. This could introduce multicollinearity, which makes it difficult to determine the individual effect of each predictor. However, we inspected the variance inflation factors (VIFs) to ensure that multicollinearity was not excessively high.
+
+**4.Non-Independence of Observations:**
+- Polls conducted by the same pollster over time might not be entirely independent, leading to autocorrelation in the data. While Model 2 partially addresses this by including pollster as a fixed effect, a more complex model (e.g., hierarchical or Bayesian) could better capture these dependencies.
+
+
+**Alternatives Considered**
+
+**1.Logistic Regression:**
+- Logistic regression was considered as an alternative, but it was ultimately deemed unsuitable because the outcome variable (pct) is continuous, rather than binary. Logistic regression is appropriate for classification tasks where the outcome is binary (e.g., win or lose), but our goal is to predict support percentages, making multiple linear regression a more appropriate choice.
+
+**2.Bayesian Modeling:**
+- A Bayesian approach could provide richer insights by incorporating prior beliefs and estimating posterior distributions for model parameters. This could be particularly useful for incorporating prior knowledge about pollster biases or expected trends. However, for this study, we focused on linear regression to prioritize interpretability and computational simplicity.
+
+**3.Inclusion of State-Level Effects:**
+- An additional layer of complexity that could be added to the model is the inclusion of state-level effects to capture geographical variations in polling support. State-level data was available, but due to concerns over sample size in certain states, we opted not to include state as a random effect in this version of the models. Future iterations could explore adding a random effect for state to account for regional differences.
+
+
+**Evaluation Metrics**
+
+The models were evaluated based on:
+
+- **Root Mean Squared Error (RMSE):** To assess the goodness-of-fit for both models. Lower RMSE values indicate that the model predictions are close to the observed polling percentages.
+- **Cross-Validation:** We used a train-test split to ensure that the model generalizes well to unseen data. This helps prevent overfitting, where the model might otherwise perform well on training data but poorly on new observations.
+
+
+**Summary**
+
+Our modeling approach leverages multiple linear regression to capture the relationship between polling percentages and various time, quality, and methodological factors. By fitting separate models for Kamala Harris and Donald Trump, we are able to compare and contrast their polling trends while accounting for pollster quality and potential biases. The inclusion of pollster in Model 2 allows us to control for variability between polling organizations, enhancing the accuracy of the model’s predictions.
+
+The primary goal is to understand how support evolves over time and how it is influenced by the quality and methodology of the polling process. Despite some limitations, the models provide a useful framework for analyzing polling data, and future iterations could explore more sophisticated approaches such as Bayesian modeling or hierarchical random effects to improve robustness.
 
 # Results
 
