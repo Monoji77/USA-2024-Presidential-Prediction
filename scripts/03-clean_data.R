@@ -52,4 +52,5 @@ just_trump_high_quality <- data |>
   )
 
 #### Save data ####
-write_csv(cleaned_data, "outputs/data/02-analysis_data/analysis_data.csv")
+write_csv(just_harris_high_quality, "outputs/data/02-analysis_data/analysis_data_harris.csv")
+write_csv(just_trump_high_quality, "outputs/data/02-analysis_data/analysis_data_trump.csv")
