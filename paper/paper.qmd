@@ -40,6 +40,62 @@ This report was written with the assistance of R @citeR. Additionally, @tidyvers
 
 The data used in this model comes from fivethirtyeight.com, a polling site known for their in-depth analysis and data on US elections @fivethirtyeight. Here, we have used the 2024 general election data, originally accessed on 10/21/2024. The data contains information from several polls taken across the United States, including the operator, sponsors, methodology, a numeric grade to quanitfy the quality of the poll, and when and where the poll was taken. From this dataset, polls predicting a Harris win were considered, to construct the predictive model.
 
+# Measurement
+
+The dataset comes from fivethirtyeight.com, a statistical analysis website dedicated to US sports and elections [@fivethirtyeight]. Fivethirtyeight takes polls conducted on a particular topic (in this case the 2024 US presidency), and aggregates them in one dataset.
+
+Election polls are used to gauge public opinion about candidates, political topics, voter engagement, and public opinion of the election process. Election polls also serve as key insight to political organisations representing candidates, polls can show potential weak points across demographics.
+
+Election polls are similarly to regular polls, they involve asking a sample population a series of questions via a delivery method. The key distinction is that election polls typically try to target *voters*, or people who are most likely to vote in the election cycle being investigated. This is a key challenge to pollsters, as there are many subgroups of voters, such as people who seldom vote or never vote. According to Pew Research, a third of US citizens did not vote in the 2020 election, despite the 2020 election cycle having high voter turnout [@pew_polls]. There may also be cases when respondents of a poll reconsider whether they will vote come election day.
+
+Election polling has exploded in recent times according to Pew Research. They suggest that double there are double the amount of active pollsters in 2022 compared to 2000 [@pew_polls]. One reason mentioned is the advent of online polling, which is simple, cheap, and can easily reach US citizens across the country, compared to traditional methods such as poll by phone and mail. As a result, while the diversity of pollsters has increased dramatically, the variance in results methodology, and ethics have also increased
+
+Errors in election polling have been an issue in the last two cycles of presidential elections. Between the 2016 and 2020 elections, there has been a trend of pollsters not fully capturing Trump's support. For example in 2020, despite Biden winning the election, there were reports from the American Associcate for Public Opinion Research that national polls overstated his victory over Trump by 3.9 percentage points [@pew_polls].
+
+Fivethirty eight mitigates the influx of pollsters and the potential for errors by routinely checking up on pollsters as they produce reports. Fivethirtyeight checks every pollster, regardless of experience or prestige. There are 2 types of checks fivethirtyeight uses: Methodology and Ethics.
+
+Methodology refers to the scientific rigor exhibited by the pollster, when conducting the poll, and in the presentation of the results. Fivethirtyeight requires each poll to have or easily obtain the following [@faq538]:
+
+-   Pollster Identity
+
+-   Survey Dates
+
+-   Population Sample (Size and other distinct attributes)
+
+-   Polling Method (How was the poll conducted?)
+
+-   Sponsors (Identity and Amount
+
+Even if these conditions are met, fivethirtyeight may refuse to include certain polls in their data, due to flaws in methodology. Some examples include [@faq538]:
+
+-   Polls with inappropriate sample for target population
+
+-   Polls based upon predictive models
+
+-   Polls that implement recontact with participants (potential for bias to creep into the sample)
+
+-   Polls done by amateur/non-professional pollsters
+
+-   Polls with an "informed ballot" (when information about a candidate is given to the participant before they are asked who they would vote for)
+
+The second check fivethirtyeight implements is ethical standard, adapted from the American Association for Public Opinion Research's Code of Professional Ethics and Practices . Fivethirtyeight may refuse to include polls that [@faq538]:
+
+-   Fabricate or falsify data
+
+-   Are associated with the betting industry
+
+-   Refuse to disclose their methodology, either in their findings, or after being contacted for clarification
+
+-   Misrepresent their true purpose (being part of campaign analysis or done for a particular party or candidate)
+
+-   Disclose errors that come about from their work, and rectify them as best as possible
+
+-   Utilize methods that will give misleading results
+
+Fivethirtyeight will conduct an initial check on pollsters, seeing if their methodology and ethics are publicly available, and are in agreement with fivethirtyeight's checks. If unclear, fivethirtyeight will do a more thorough investigation of the pollster, and ask the organizers questions about their methodology and ethics if none were visible in the public report. If there are any violations in ethics, the severity on consequences will vary on what the offence is. If there is evidence of falsifying data or engaging in betting markets, the pollster is blacklisted from their data. Otherwise, pollsters are given a chance to fix ethical issues presented by fivethirtyeight. Failure to do so results in the pollster and any of its polls being taken off the dataset, but fivethirtyeight can reverse this decision if the pollster demonstrates satifactory ethics and methodology practices[@faq538].
+
+Partisan polls are a small subset of polls that are made with the backing or organizations affiliated with one or more political organizations. Fivethirtyeight will allow these polls into their data, but they will be marked as "Partisan", and extra checks are put in place to ensure the polling data hasn't been influenced unethically by the pollster or it's affiliated organizations [@faq538].
+
 # Model
 
 The model contains 4 parameters. They are pollster, state, sponsors, and methodology.
