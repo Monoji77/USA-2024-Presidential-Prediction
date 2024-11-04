@@ -16,29 +16,38 @@ library(rstanarm)
 library(splines)
 
 #### Clean Data Function ####
-clean_candidate_data <- function(data, candidate_name, declaration_date) {
-  data |>
-    filter(
-      candidate_name == candidate_name,
-      numeric_grade >= 2.7 # TODO: Investigate the choice of threshold for high-quality polls
-    ) |>
-    mutate(
-      state = if_else(is.na(state), "National", state), # TODO: Review the state NA replacement logic for national polls
-      end_date = mdy(end_date)
-    ) |>
-    filter(end_date >= as.Date(declaration_date)) |>
-    mutate(
-      num_supporters = round((pct / 100) * sample_size, 0) # Convert percentage to count of supporters
-    ) |>
-    rename(
-      pollster_rating = numeric_grade # Renaming numeric_grade to pollster_rating for clarity
-    )
-}
 
-#### Clean Data ####
-# Clean data for Harris and Trump
-just_harris_high_quality <- clean_candidate_data(data, "Kamala Harris", "2024-07-21")
-just_trump_high_quality <- clean_candidate_data(data, "Donald Trump", "2024-06-01") # Update date if needed
+data <- read_csv("data/01-raw_data/raw_elections_data.csv")
+
+just_harris_high_quality <- data |>
+  filter(
+    candidate_name == "Kamala Harris",
+    numeric_grade >= 2.5 #
+  
+  ) |>
+  mutate(
+    state = if_else(is.na(state), "National", state), # Hacky fix for national polls
+    end_date = mdy(end_date)
+  ) |>
+  filter(end_date >= as.Date("2024-07-21")) |> # When Harris declared
+  mutate(
+    num_harris = round((pct / 100) * sample_size, 0) # Need number not percent for some models
+  )
+
+# Filter data to Trump estimates based on high-quality polls after he declared
+just_trump_high_quality <- data |>
+  filter(
+    candidate_name == "Donald Trump",
+    numeric_grade >= 2.5
+  ) |>
+  mutate(
+    state = if_else(is.na(state), "National", state),
+    end_date = mdy(end_date)
+  ) |>
+  filter(end_date >= as.Date("2024-07-21")) |> # Update with Trump's declaration date if needed
+  mutate(
+    num_trump = round((pct / 100) * sample_size, 0)
+  )
 
 #### Save Data ####
 write_csv(just_harris_high_quality, "data/02-analysis_data/analysis_data_harris.csv")

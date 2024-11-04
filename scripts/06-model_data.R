@@ -10,39 +10,30 @@
 
 #### Workspace setup ####
 library(tidyverse)
+library(janitor)
+library(lubridate)
+library(broom)
+library(modelsummary)
 library(rstanarm)
+library(splines)
 
 #### Read data ####
-just_harris_high_quality <- read_csv("outputs/data/02-analysis_data/analysis_data_harris.csv")
-just_trump_high_quality <- read_csv("outputs/data/02-analysis_data/analysis_data_trump.csv")
+just_harris_high_quality <- read_csv("data/02-analysis_data/analysis_data_harris.csv")
+just_trump_high_quality <- read_csv("data/02-analysis_data/analysis_data_trump.csv")
 
 ### Model data ####
 base_plot <- ggplot(just_harris_high_quality, aes(x = end_date, y = pct)) +
   theme_classic() +
   labs(y = "Harris percent", x = "Date")
 
-base_plot_trump <- ggplot(just_trump_high_quality, aes(x = end_date, y = pct)) +
-  theme_classic() +
-  labs(y = "Trump percent", x = "Date")
-
 # Plots poll estimates and overall smoothing
 base_plot +
   geom_point() +
   geom_smooth()
 
-base_plot_trump +
-  geom_point() +
-  geom_smooth()
-
-
 # Color by pollster
 # This gets messy - need to add a filter - see line 21
 base_plot +
-  geom_point(aes(color = pollster)) +
-  geom_smooth() +
-  theme(legend.position = "bottom")
-
-base_plot_trump +
   geom_point(aes(color = pollster)) +
   geom_smooth() +
   theme(legend.position = "bottom")
@@ -55,22 +46,34 @@ base_plot +
   geom_smooth() +
   facet_wrap(vars(pollster))
 
-base_plot_trump +
-  geom_point() +
-  geom_smooth() +
-  facet_wrap(vars(pollster))
-
 # Color by pollscore
 base_plot +
   geom_point(aes(color = factor(pollscore))) +
   geom_smooth() +
   theme(legend.position = "bottom")
 
+base_plot_trump <- ggplot(just_trump_high_quality, aes(x = end_date, y = pct)) +
+  theme_classic() +
+  labs(y = "Trump percent", x = "Date")
+
+base_plot_trump +
+  geom_point() +
+  geom_smooth()
+
+base_plot_trump +
+  geom_point(aes(color = pollster)) +
+  geom_smooth() +
+  theme(legend.position = "bottom")
+
+base_plot_trump +
+  geom_point() +
+  geom_smooth() +
+  facet_wrap(vars(pollster))
+
 base_plot_trump +
   geom_point(aes(color = factor(pollscore))) +
   geom_smooth() +
   theme(legend.position = "bottom")
-
 
 #### Starter models ####
 # Model 1: pct as a function of end_date
