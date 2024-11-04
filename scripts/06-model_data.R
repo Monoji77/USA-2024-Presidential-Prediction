@@ -76,7 +76,7 @@ base_plot_trump +
   theme(legend.position = "bottom")
 
 #### Starter models ####
-# Model 1: pct as a function of end_date
+# Model 1: pct as a function of end_date, transparency_score and numeric_date
 model_date <- lm(pct ~ end_date + transparency_score + numeric_grade, data = just_harris_high_quality)
 
 # Model 2: pct as a function of end_date and pollster
@@ -89,7 +89,7 @@ just_harris_high_quality <- just_harris_high_quality |>
     fitted_date_pollster = predict(model_date_pollster)
   )
 
-# Model 1 for Trump: pct as a function of end_date
+# Model 1 for Trump: pct as a function of end_date, transparency_score and numeric_date
 model_date_trump <- lm(pct ~ end_date  + transparency_score + numeric_grade, data = just_trump_high_quality)
 
 # Model 2 for Trump: pct as a function of end_date and pollster
@@ -108,7 +108,7 @@ ggplot(just_harris_high_quality, aes(x = end_date)) +
   geom_point(aes(y = pct), color = "black") +
   geom_line(aes(y = fitted_date), color = "blue", linetype = "dotted") +
   theme_classic() +
-  labs(y = "Harris percent", x = "Date", title = "Linear Model: pct ~ end_date")
+  labs(y = "Harris percent", x = "Date", title = "Linear Model: pct ~ end_date + transparency_score + numeric_date")
 
 # Model 2
 ggplot(just_harris_high_quality, aes(x = end_date)) +
@@ -124,7 +124,7 @@ ggplot(just_trump_high_quality, aes(x = end_date)) +
   geom_point(aes(y = pct), color = "black") +
   geom_line(aes(y = fitted_date), color = "red", linetype = "dotted") +
   theme_classic() +
-  labs(y = "Trump percent", x = "Date", title = "Linear Model: pct ~ end_date")
+  labs(y = "Trump percent", x = "Date", title = "Linear Model: pct ~ end_date + transparency_score + numeric_date")
 
 # Model 2
 ggplot(just_trump_high_quality, aes(x = end_date)) +
@@ -157,7 +157,7 @@ ggplot(combined_data_with_preds, aes(x = end_date, y = pct)) +
   
   # Add labels and theme
   labs(
-    x = "Polling End Date",
+    x = "Polling End Date ",
     y = "Polling Percentage",
     title = "Polling Predictions for Kamala Harris and Donald Trump",
     color = "Candidate"
