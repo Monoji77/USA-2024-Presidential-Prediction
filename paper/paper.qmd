@@ -9,7 +9,7 @@ author:
 thanks: "Code and data are available at: [https://github.com/Monoji77/USA-pollster](https://github.com/Monoji77/USA-pollster)."
 date: today
 date-format: long
-abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
+abstract: "This paper forecasts the 2024 U.S. Presidential Election between Kamala Harris and Donald Trump using linear regression models applied to recent polling data. The analysis projects a win for Harris, who leads Trump by an estimated 5 percentage points on average, with consistent support across most polling organizations and swing states. The models underscore the impact of pollster bias and regional variability on election outcomes. Future research should integrate non-linear modeling and Bayesian methods to improve predictive accuracy."
 format: pdf
 number-sections: true
 bibliography: references.bib
