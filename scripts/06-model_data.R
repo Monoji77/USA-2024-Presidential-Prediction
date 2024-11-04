@@ -16,6 +16,7 @@ library(broom)
 library(modelsummary)
 library(rstanarm)
 library(splines)
+library(arrow)
 
 #### Read data ####
 just_harris_high_quality <- read_csv("data/02-analysis_data/analysis_data_harris.csv")
@@ -189,38 +190,25 @@ ggplot(combined_data_with_preds, aes(x = end_date, y = pct)) +
 # All of the above would be in scripts - data cleaning scripts and modelling scripts. 
 # This is an example of how you get a results table that you could put into your Quarto doc
 modelsummary(models = list("Model 1" = model_date, "Model 2" = model_date_pollster))
+modelsummary(models = list("Model 1" = model_date_trump, "Model 2" = model_date_pollster_trump))
 
-# Define major swing states
-swing_states <- c("Arizona", "Georgia", "Michigan", "Nevada", "North Carolina", "Pennsylvania", "Wisconsin")
+#### Save Models ####
+# Save each model to the models directory
+saveRDS(model_date, file = "models/model_date_harris.rds")
+saveRDS(model_date_pollster, file = "models/model_date_pollster_harris.rds")
+saveRDS(model_date_trump, file = "models/model_date_trump.rds")
+saveRDS(model_date_pollster_trump, file = "models/model_date_pollster_trump.rds")
 
-combined_data <- bind_rows(
-  just_harris_high_quality |> mutate(candidate = "Kamala Harris"),
-  just_trump_high_quality |> mutate(candidate = "Donald Trump")
-)
+#### Write Data to Parquet ####
+# Write augmented Harris data to Parquet
+write_parquet(just_harris_high_quality, "data/02-analysis_data/just_harris_high_quality.parquet")
 
-# Filter data for Harris and Trump in the swing states
-swing_states_data <- combined_data |>
-  filter(state %in% swing_states)
+# Write augmented Trump data to Parquet
+write_parquet(just_trump_high_quality, "data/02-analysis_data/just_trump_high_quality.parquet")
 
-# Create a base plot for swing states data
-swing_states_plot <- ggplot(swing_states_data, aes(x = end_date, y = pct, color = candidate)) +
-  theme_minimal() +
-  labs(x = "Polling End Date", y = "Polling Percentage", title = "Polling Outcomes in Swing States") +
-  theme(legend.position = "bottom")
+# Write combined data (Harris and Trump) to Parquet
+write_parquet(combined_data_with_preds, "data/02-analysis_data/combined_data_with_preds.parquet")
 
-# Facet the plot by state
-swing_states_plot +
-  geom_point(aes(shape = candidate), alpha = 0.7) +
-  geom_smooth(aes(linetype = candidate), se = FALSE) +
-  facet_wrap(vars(state)) +
-  scale_color_manual(values = c("Kamala Harris" = "blue", "Donald Trump" = "red"))
-
-
-
-#### Save model ####
-saveRDS(
-  first_model,
-  file = "models/first_model.rds"
-)
-
+# Write swing states data to Parquet
+write_parquet(swing_states_data, "data/02-analysis_data/swing_states_data.parquet")
 
