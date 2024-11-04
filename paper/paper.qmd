@@ -38,7 +38,7 @@ This report was written with the assistance of R @citeR. Additionally, @tidyvers
 
 # Data {#sec-data}
 
-The dataset provided by fivethirtyeight contains over 15000 observations across 50 variables. Each observation is a poll conducted on the 2024 US Presidential Election. Fivethirtyeight's dataset was chosen due to it's comprehensive review of polls and pollsters, attributing grades in error and bias, as well as in transparency. Their thorough investigations ensure their dataset not only contains insightful polls, but also includes as much relevant information about the polls conducted as possible. This gives us plenty of predictors when building a model that will caluclate the percentage win of either Trump or Harris.
+The dataset provided by fivethirtyeight [@fivethirtyeight] contains over 15000 observations across 50 variables. Each observation is a poll conducted on the 2024 US Presidential Election. Fivethirtyeight's dataset was chosen due to it's comprehensive review of polls and pollsters, attributing grades in error and bias, as well as in transparency. Their thorough investigations ensure their dataset not only contains insightful polls, but also includes as much relevant information about the polls conducted as possible. This gives us plenty of predictors when building a model that will caluclate the percentage win of either Trump or Harris.
 
 The dataset was read into R [@citeR], and cleaned using the R package tidyverse [@tidyverse]. Due to Kamal's late entry into the race, some polls do not have any data on her specifically. This is why we set a cut-off date at 2024/07/21, the day Kamala replaced Joe Biden as the Democratic nominee.
 
