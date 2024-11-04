@@ -1,8 +1,8 @@
 #### Preamble ####
-# Purpose: Cleans and processes election polling data for Kamala Harris and Donald Trump
-# Author: [Your Name]
-# Date: [Current Date]
-# Contact: [Your Email]
+# Purpose: Linear Models for Prediction
+# Author: Prankit Bhardwaj, Veyasan Ragulan, Chris Yong Hong Sen
+# Date: 4 November 2024
+# Contact: prankit.bhardwaj@mail.utoronto.ca 
 # License: MIT
 # Pre-requisites: Requires raw election polling data in the "data/01-raw_data/" directory.
 
