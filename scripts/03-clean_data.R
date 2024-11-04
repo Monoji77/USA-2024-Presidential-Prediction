@@ -28,6 +28,9 @@ just_harris_high_quality <- data |>
   filter(end_date >= as.Date("2024-07-21")) |> # When Harris declared
   mutate(
     num_harris = round((pct / 100) * sample_size, 0) # Need number not percent for some models
+  ) |>
+  rename(
+    pollster_rating = numerical_grade # Need number not percent for some models
   )
 
 # Filter data to Trump estimates based on high-quality polls after he declared
@@ -43,6 +46,9 @@ just_trump_high_quality <- data |>
   filter(end_date >= as.Date("2024-07-21")) |> # Update with Trump's declaration date if needed
   mutate(
     num_trump = round((pct / 100) * sample_size, 0)
+  ) |>
+  rename(
+    pollster_rating = numerical_grade # Need number not percent for some models
   )
 
 #### Save data ####
