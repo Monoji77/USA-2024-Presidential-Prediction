@@ -20,6 +20,7 @@ bibliography: references.bib
 library(tidyverse)
 library(palmerpenguins)
 library(knitr)
+data <- read_csv("../data/02-analysis_data/analysis_data.csv")
 ```
 
 
@@ -52,7 +53,7 @@ Overview text
 	
 Some paragraphs about how we go from a phenomena in the world to an entry in the dataset.
 
-## Outcome variables
+## Predictor Variables
 
 Add graphs, tables and text. Use sub-sub-headings for each outcome variable or update the subheading to be singular.
 
@@ -64,7 +65,8 @@ Some of our data is of penguins (@fig-bills), from @palmerpenguins.
 #| label: fig-bills
 #| fig-cap: Bills of penguins
 #| echo: false
-
+data |>
+  select(poll_id, pollster_id, candidate_name, winner)
 ggplot(penguins, aes(x = island, fill = species)) +
   geom_bar(alpha = 0.8) +
   scale_fill_manual(values = c("darkorange","purple","cyan4"),
@@ -86,13 +88,126 @@ And also planes (@fig-planes). (You can change the height and width, but don't w
 #| message: false
 
 analysis_data <- read_csv(here::here("data/02-analysis_data/analysis_data.csv"))
+```
 
-analysis_data |> 
-  ggplot(aes(x = width, y = length)) +
-  geom_point(alpha = 0.8) +
-  theme_minimal() +
-  labs(x = "Wing width (mm)",
-       y = "Wing length (mm)")
+```{r}
+raw_pollster_data <- read_csv('../data/01-raw_data/raw_pollster_data.csv')
+
+raw_pollster_data |>
+  colnames()
+
+raw_pollster_data |>
+  select(party, candidate_name) |>
+  unique() |>
+  arrange(party, candidate_name)
+
+raw_pollster_data |>
+  select(party, candidate_name) |>
+  unique() |>
+  filter(grepl('Donald', candidate_name))
+
+# remove trailing time stamp
+raw_pollster_data$created_at <- sapply(strsplit(raw_pollster_data$created_at, '\\s+'), '[', 1)
+
+time_var <- c('start_date', 'end_date', 'created_at')
+
+# get day, month, year in character data type
+raw_pollster_data$month <- sapply(strsplit(raw_pollster_data$created_at, '/'), '[', 1)
+raw_pollster_data$day <- sapply(strsplit(raw_pollster_data$created_at, '/'), '[', 2)
+raw_pollster_data$year <- sapply(strsplit(raw_pollster_data$created_at, '/'), '[', 3) 
+
+# observe how year is not cleaned
+unique(raw_pollster_data$year)
+
+# correct different formats for year
+raw_pollster_data$year <- case_when(
+  raw_pollster_data$year %in% c('24', '2024') ~ 2024,
+  raw_pollster_data$year %in% c('23', '2023') ~ 2023,
+  raw_pollster_data$year %in% c('22', '2022') ~ 2022,
+  raw_pollster_data$year %in% c('21', '2021') ~ 2021,
+  )
+
+# check that year is cleaned
+unique(raw_pollster_data$year)
+
+raw_pollster_data <- raw_pollster_data |>
+  mutate(day = ifelse(day < '10', paste0('0', day), day),
+         month = ifelse(month < '10', paste0('0', month), month),
+         created_at = as.Date(paste(year, month, day, sep='-'))) 
+
+# get day, month, year in character data type
+raw_pollster_data$month <- sapply(strsplit(raw_pollster_data$start_date, '/'), '[', 1)
+raw_pollster_data$day <- sapply(strsplit(raw_pollster_data$start_date, '/'), '[', 2)
+raw_pollster_data$year <- sapply(strsplit(raw_pollster_data$start_date, '/'), '[', 3) 
+
+# observe how year is not cleaned
+unique(raw_pollster_data$year)
+
+# correct different formats for year
+raw_pollster_data$year <- case_when(
+  raw_pollster_data$year %in% c('24', '2024') ~ 2024,
+  raw_pollster_data$year %in% c('23', '2023') ~ 2023,
+  raw_pollster_data$year %in% c('22', '2022') ~ 2022,
+  raw_pollster_data$year %in% c('21', '2021') ~ 2021,
+  )
+
+# check that year is cleaned
+unique(raw_pollster_data$year)
+
+raw_pollster_data <- raw_pollster_data |>
+  mutate(day = ifelse(day < '10', paste0('0', day), day),
+         month = ifelse(month < '10', paste0('0', month), month),
+         start_date = as.Date(paste(year, month, day, sep='-'))) 
+
+# get day, month, year in character data type
+raw_pollster_data$month <- sapply(strsplit(raw_pollster_data$end_date, '/'), '[', 1)
+raw_pollster_data$day <- sapply(strsplit(raw_pollster_data$end_date, '/'), '[', 2)
+raw_pollster_data$year <- sapply(strsplit(raw_pollster_data$end_date, '/'), '[', 3) 
+
+# observe how year is not cleaned
+unique(raw_pollster_data$year)
+
+# correct different formats for year
+raw_pollster_data$year <- case_when(
+  raw_pollster_data$year %in% c('24', '2024') ~ 2024,
+  raw_pollster_data$year %in% c('23', '2023') ~ 2023,
+  raw_pollster_data$year %in% c('22', '2022') ~ 2022,
+  raw_pollster_data$year %in% c('21', '2021') ~ 2021,
+  )
+
+# check that year is cleaned
+unique(raw_pollster_data$year)
+
+raw_pollster_data <- raw_pollster_data |>
+  mutate(day = ifelse(day < '10', paste0('0', day), day),
+         month = ifelse(month < '10', paste0('0', month), month),
+         end_date = as.Date(paste(year, month, day, sep='-'))) 
+
+raw_pollster_data |>
+  select(start_date, end_date, created_at) |>
+  summarise(min(start_date))
+
+sum(is.na(raw_pollster_data$partisan))
+
+raw_pollster_data |>
+  filter(!is.na(state))
+  
+raw_pollster_data |>
+  select(office_type) |>
+  unique()
+
+raw_pollster_data |>
+  summarise(min(pollscore, na.rm=T), max(pollscore, na.rm=T))
+
+raw_pollster_data |>
+  summarise(min(transparency_score, na.rm=T), max(transparency_score, na.rm=T))
+
+raw_pollster_data |>
+  summarise(min(numeric_grade, na.rm=T), max(numeric_grade, na.rm=T))
+
+raw_pollster_data |>
+  summarise(min(start_date, na.rm=T), max(start_date, na.rm=T),
+            min(end_date, na.rm=T), max(end_date, na.rm=T))
 ```
 
 Talk way more about it. 
@@ -199,10 +314,17 @@ Weaknesses and next steps should also be included.
 
 # Patriot Polling: Wisconsin Presidential Analysis Data Collection 
 
-## Methodology
+## Methodology: Overview {#sec-patriot_polling_overview}
 From 12 to 14 October 2024, Patriot Polling has conducted phone surveys in the state of Wisconsin of the United States of America, which borders Minnesota, Iowa, Michegan, and Illinois. Their target population are voters in Wisconsin. For sample of landlines which are characterised by households, an equal number of phone numbers are randomly selected across every landline block in Wisconsin using Random Digit Dialing (RDD). As for the sample of mobile numbers, which are characterised by an individual with access to a digital mobile device, the sample was purchased from a consumer contact number database. For this poll, a total of 803 respondents has completed the survey either from contact through the landline or their personal contact number. [@patriotPollingMethodology]
 
-@patriotPollingMethodology conducted polling in such a way where a randomly contacted respondent would hear pre-recorded voice messages and users are able to interact with the automated phone system. This system is called Interactive voice response (IVR) which can handle outbound calls more systematically since the same questions would be asked sequentially in the survey. There were only 2 questions that were asked. Both questions begin with 'How will you vote for president?'. This is followed by the candidates name as it appears in the voting ballot.
+@patriotPollingMethodology conducted polling in such a way where a randomly contacted respondent would hear pre-recorded voice messages and users are able to interact with the automated phone system. This system is called Interactive voice response (IVR) which can handle outbound calls more systematically since the same questions would be asked sequentially in the survey. There were 2 questions provided by Patriot Polling that were asked to respondents. Both questions begin with 'How will you vote for president?'. This is followed by the candidates name as it appears in the voting ballot. There was no indication whether this was all the questions that were asked but there were tables provided by the pollster showing the breakdown by sex, education, preferred political affiliation and income. Therefore, it would be safe to assume that there were questions related to the socio-demographic characteristics of the respondents even though we don't know the specific questions asked. 
+
+## Methodology: Population
+The targeted population of this poll was not explicitly stated. While the pollster did conduct phone surveys, they did not mention any inclusion or exclusion criteria. Furthermore, the use of IVR during phone surveys and lack of information provided regarding the questions asked as discussed in @sec-patriot_polling_overview, it will be difficult to guarantee that the polls are targeting all eligible voters in Wisconsin. Given that nature of the polling article focuses on Wisconsin, it would be safe to assume that the targeted population would be eligible voters above 18 years old in Wisconsin.
+
+## Methodology: Sampling Frame
+Since phone surveys were conducted on both landlines and smartphones, the sampling frame of this poll would be eligible voters above 18 years old in Wisconsin with a working landline or possess a phone with a working contact number.     
+
 
 ## Strengths {#sec-WisconsinStrengths}
 This automated method of phone surveys is a lot more convenient and efficient than in person type of surveys since it removes the need for a surveyor to visit respondents face to face and also removes the need for a surveyor to contact multiple respondents over the phone. This decreases labour effort and cost. 
@@ -219,30 +341,103 @@ The handling of no-response entities were also not explicitly mentioned by Patri
 
 Also, the initial phrasing to the second question can very easily confuse respondents. Although the initial phrasing is followed by the senate candidate's name, the initial phrasing 'How will you vote for president' still uses the wrong word 'president' instead of 'senate'. This does not reflect a high quality survey, which could lead to decreased trust from the respondent to Patriot Polling, in turn potentially resulting in a premature end to the surveys, voiding the initial response.
 
-Lastly, the purchasing of phone numbers from a consumer database would introduce of selection bias. Individuals from middle to higher socio-economic status would have greater purchasing power than their lower income counterparts, which means individuals from lower socio-economic status may not have phones. In addition, elderlies within Wisconsin may not necessarily have mobile phones due to the lack of skills to use such technologies. Also, individuals would've opted for do-not-call registries, opted out of marketing databases or simply have prepaid phones which do not link to their personal information. This could mean an under representation of individuals from the said groups.
+Overall, the biggest weakness in the methodology would be the purchasing of phone numbers from a consumer database as it introduces selection bias. Individuals from middle to higher socio-economic status would have greater purchasing power than their lower income counterparts, which means individuals from lower socio-economic status may not have phones. In addition, elderlies within Wisconsin may not necessarily have mobile phones due to the lack of skills to use such technologies. Also, individuals would've opted for do-not-call registries, opted out of marketing databases or simply have prepaid phones which do not link to their personal information. This could mean an under representation of individuals from the said groups.
 
+## Simulation exploring weaknesses in Patriot's Polling's methodology
+To illustrate the biggest concern raised in @sec-WisconsinWeaknesses, we will be simulating a Patriot's Polling's methodology by using US Census data to obtain random our pool of samples that are representive of the population of Wisconsin with information about their age, race and county. Since the raw data provided by IPUM [@USACensusData] encoded states and counties, we combined the raw data with a supplementary excel file provided by IPUM to obtain the actual county name. We will be using the variable $CISMRTPHN$ from the census data which represents whether the particular respondent of the census data has a smartphone. This variable will be used to mirror a Patriot's Polling methodology of obtaining personal contact number by purchasing from an online database. We used this approach as only Wisconsin respondents with smartphones can possibly be included in a smartphone contact number database.
 
-```{r senate they voted for}
-#| label: tbl-senate
-#| include: false
+For the sake of discussion, we will be obtaining 2 samples. **Sample A will include respondents above the voting age of 18 in Wisconsin regardless of whether they possess a smartphone while sample B will only include respondents above the voting age of 18 in Wisconsin who have smartphones.** Sample B will mimic purchasing phone numbers from a database. 
+
+@tbl-race_correct_representation shows us the proportion of white, black and asian races from sample A while @tbl-race_wrong_representation shows us that from sample B. We notice that black individuals from Wisconsin are underrepresented (8.7% vs 9.4%). According to @BlackPovertyWisconsin, black poverty rates in Wisconsin are 2.5 times higher than the overall Wisconsin poverty rate. This supports the finding that if we were to include only individuals with smartphones, certain racial groups might be underrepresented. Likewise, we are able to observe Asians being overrepresented (4.4% vs 3.8%). @AsianWealthUS exerts that for various educational attainment levels, Asians are earning more than individuals who belong to white, black or hispanic households. It is unsurprising that Asians are being overrepresented as higher wealth among the Asian population in Wisconsin would translate to higher purchasing power to purchase smartphones. Asians would naturally be more likely to be included in a sample where only smartphone users are considered, by extension, Asians would be more likely to be included in a sample obtained from a consumer database containing user contact numbers.
+```{r}
 #| echo: false
-#| layout-ncol: 2
-#| fig-cap: "Presidental Candidates Votes"
-#| fig-subcap: ["Percentage of votes for senate candidates in Wisconsin", "Percentage of votes for presidential candidates in Wisconsin"]
+#| eval: true
+#| label: tbl-race_correct_representation
+#| tbl-cap: "proportion of races from non-smartphone-discriminating sample"
+#| warning: false
+census_data <- read_csv("../data/00-simulated_data/simulated_appendix_data.csv")
+
+set.seed(304)
+smartphone_only_sample <- census_data |>
+  filter(has_smartphone == 1) |>
+  sample_n(1000, replace=FALSE, weight = weight)
+
+all_sampled <- census_data |>
+  sample_n(1000, replace=FALSE, weight = weight)
+
+race_table_full_sample <- all_sampled |> 
+  group_by(race) |>
+  count() |>
+  ungroup() |>
+  mutate(prop = paste0(round(n/sum(n) * 100,1),'%')) |>
+  select(race, count = n, proportion = prop)
+
+kable(race_table_full_sample)
 
 
-presidential_voter_table <- tibble(
-  'Presidential Candidate'= c('Donald Trump (R)', 'Kamala Harris (D)'),
-  'Registered Voters'= c('50%', '49%'),
-)
-senate_voter_table <- tibble(
-  'Senate Candidate'= c('Tammy Baldwin (R)', 'Eric Hovde (D)'),
-  'Registered Voters'= c('50%', '49%'),
-)
-
-kable(presidential_voter_table) 
-kable(senate_voter_table)
 ```
+
+```{r}
+#| echo: false
+#| eval: true
+#| label: tbl-race_wrong_representation
+#| tbl-cap: "proportion of races from smartphone-only sample"
+#| warning: false
+
+# asians overrepresented, blacks underrepresented
+race_table_smartphone_sample <- smartphone_only_sample |> 
+  group_by(race) |>
+  count() |>
+  ungroup() |>
+  mutate(prop = paste0(round(n/sum(n) * 100,1),'%')) |>
+  select(race, count = n, proportion_chosen = prop)
+
+
+kable(race_table_smartphone_sample)
+```
+
+This becomes an issue because underrepresentation of black communities and overrepresentation of asian communities in Wisconsin would not reflect the actual voting preferences of a particular racial demographic, resulting in sampling bias, potentially misleading people who interpret a Patriot Polling's poll on Wisconsin or even their written articles.
+
+Next, @tbl-age-differerences shows us the the percentage difference in individuals chosen categorised by age groups from sample A and B. We are immediately alerted to a 20% decrease in the number of elderlies chosen from sampling method B compared to sampling method A. As of 2024, elderlies above the age of 65 are either from the baby boomer generation or silent generation, who are known to experience difficulty when using smartphones. @SmartphoneByAge shows us that 97% of Americans between 18 to 49 have smartphones, 89% for that of age groups 50 to 64, and a lower 76% of the American elderlies above 65 year old who own smartphones. Therefore, by proceeding with sample B (parallel to purchasing phone numbers from consumer database) for which the inclusion critera selects individuals who own smartphones, we might be discounting the votes of elderly population, resulting in selection bias.
+
+{{< pagebreak >}}
+
+```{r}
+#| echo: false
+#| eval: true
+#| label: tbl-age-differerences
+#| tbl-cap: "percentage difference in individuals chosen from sample A and B by age groups"
+#| warning: false
+
+################
+#      age 
+#
+# results: median age is lower, and more elderlies above 65 years old
+#          are underrepresented when obtaining phone numbers straight from 
+#          database
+################ 
+age_bin_count_full <- all_sampled |>
+  count(age_bin)
+
+age_table <- smartphone_only_sample |>
+  count(age_bin) |>
+  inner_join(age_bin_count_full,
+             by = c('age_bin'='age_bin')) |>
+  mutate(diff = n.x - n.y,
+         perc_diff_1 = round(diff/n.y * 100, 0),
+         perc_diff_2 = case_when(
+           diff < 0 ~ paste0(perc_diff_1, '%'),
+           .default = paste0('+', perc_diff_1, '%'))) |>
+  arrange(desc(abs(perc_diff_1))) |>
+  select(`age bin` = age_bin, 
+         `sample A` = n.y,
+         `sample B` = n.x, 
+         `perc diff` = perc_diff_2)
+
+kable(age_table)
+```
+
+{{< pagebreak >}}
 
 # Idealised methodology for presidential election forecasting
 
@@ -253,26 +448,26 @@ US General elections runs every 4 years. The current state of the US electoral s
 In the states of Nebraska and Maine, individuals are voting not at the state level, but at the congressional district level. Nebraska has 3 districts while Maine has 2. One elector is chosen for each congressional district, and an additional 2 electors is given for the statewide majority. Unlike the other states which operate on a winner-takes-all, this difference in voting allows for greater variation in the outcome of the general elections [@Maine&NebraskaEdgeCase].   
 
 ## Idealised methodology: Pilot 
-The purpose of a pilot testing is to ensure a well-designed election forecasting survey. Due to the nature of the general election characterised by the votes of the electoral college, random sampling has to be performed across all 50 states of America. \$5,000 should go towards a pilot test obtaining 200 respondents. This pilot test would target battleground states such as Wisconsin as well as Maine and Nebraska to test specific issues around a split vote between the two presidential candidate. Begin by using stratified sampling that divides each state population into strata by various socio demographic factors (e.g. gender, highest educational attainment, race, income), then conduct systematic random sampling within each strata. An optional \$5 digital or mailed voucher can be used to incentivise respondents to complete the survey.    
+The purpose of a pilot testing is to ensure a well-designed election forecasting survey. Due to the nature of the general election characterised by the votes of the electoral college, random sampling has to be performed across all 50 states of America. \$5,000 should go towards a pilot test obtaining 200 respondents per state. This pilot test would target battleground states such as Wisconsin as well as Maine and Nebraska to test specific issues around a split vote between the two presidential candidate. Begin by using stratified sampling that divides each state population into strata by various socio demographic factors (e.g. gender, highest educational attainment, race, income), then conduct systematic random sampling within each strata. An optional \$5 digital or mailed voucher can be used to incentivise respondents to complete the survey.    
 
 Respondents should be recruited quickly using by random digit dialing (RDD) to reduce selection bias. Firstly, obtain the list of possible area codes corresponding to the first 6 digits of a contact number within a state. Then randomly sample the remaining 4 digits. Coupled with the use of an automated interactive voice response system, this would increase efficiency while taking note of non-response from either premature end to phone surveys or non-working landlines/phonelines. This also decreases response bias as unlisted contact numbers would be included in the sampling frame as well. Theoretically, a larger than expected sample has to be recruited in order to account for contact numbers that are not in use. Also, it is important to distinguish landline RDD sampling and cellphone RDD sampling as they represent different communties within the population as mentioned in @sec-WisconsinStrengths and @sec-WisconsinWeaknesses
 
 As for the contents of the phone survey, begin by providing detailed, succint information. We would introduce our company name, the purpose of the phone survey, and how only their polling preference is recorded and how their contact information would be used (but not saved) for the optional voucher redeeming purposes. If the phone survey is conducted in the first congressional district of Maine, explicitly mention that this survey is used to obtain polling preferences among voters within the first congressional district of Maine, and there are no political affiliations. It is paramount to obtain consent from the respondent. Therefore, have an option to let a respondent opt out of the survey without any form of discrimination. If a respondent chooses to continue the survey, we can ask them for their highest educational background, race, gender and/or other socio demographic information with the option to indicate non-response for any particular question. If a respondent successfully completes the phone survey, record the information into a secure, password protected excel sheet for further data analysis. It is also important to honor the incentives should the respondent complete the survey by using only the phone number. At the end, thank the respondent for their coorperative participation.
 
-In order to expand the sampling frame to include voters who may not prefer to do a phone surveys, we can conduct a Google forms survey as well which is free of charge. The format of the form should mimic that of the RDD random sampling method explained in the paragraph before this.   
+In order to expand the sampling frame to include voters who may not prefer to do a phone surveys, we can conduct a Google forms survey as well which is free of charge. The format of the form should mimic that of the RDD random sampling method. Refer to [this google form](https://forms.gle/aMUwiEs9yNwpT4tq8) for an example of the survey questions aksed.
 
 After obtaining all pilot samples, validate the pilot data by checking for any patterns or outliers. In particular, we have to pay special attention to ensure that the samples received are balanced and representive of the voting population in that particular state by cross referencing to census data available from IPUMS US census data [@USACensusData]. If the data is not representive of a particular population, it might be necessary to conduct in person surveys in regions of the state where certain demographics are underrepresented.  
 These forms of recruiting respondents should mimic the actual sampling conducted on a larger scale after a successful pilot.  
 
 ## Idealised methodology: Large scale sampling
-By refining our phone surveys and google form surveys, we can expand the surveys to all states in America. For the states of Nebraska and Maine, we will be performing both analysis for individual congressional districts and statewide majority votes to determine the number of estimated electoral votes as described in @sec-NebraskaMaine. Particularly for all battleground states as seen from the past 2020 elections like Arizona, Florida and Maine's second congressional district, we will be oversampling to ensure that the preferences of sampled voters are better representive of the overall voter population in their particular state or congressional district, leading to reduced sampling error and more precise forecasting of the presidential elections. 
+By refining our phone surveys and google form surveys, we can expand the surveys to all states in America. For this we budget out \$80,000 to obtain between 2000 to 5000 samples across each state, depending on the state's population. For the states of Nebraska and Maine, we will be performing both analysis for individual congressional districts and statewide majority votes to determine the number of estimated electoral votes as described in @sec-NebraskaMaine. Particularly for all battleground states as seen from the past 2020 elections like Arizona, Florida and Maine's second congressional district, we will be oversampling to ensure that the preferences of sampled voters are better representive of the overall voter population in their particular state or congressional district, leading to reduced sampling error and more precise forecasting of the presidential elections. 
 
 If the pilot discovers regions where certain demographics are underrepresented (e.g. poorer communities without digital communication devices nor landlines), surveyors would have to be employed in these regions to obtain samples directly.  
 
-Ultimately, the algorithm to forecast the presidential winner involves obtaining the majority vote based on samples obtained within each state (and districts in Nebraska and Maine). Then based on the  number of electors assigned to that region, we will sum up the number of electors affiliated to the presidential candidates. This sum divided by the 538 total electors would be the predicted probability that a presidential candidate would win in the upcoming election.
+Ultimately, the algorithm to forecast the presidential winner involves obtaining the majority vote based on samples obtained within each state (and districts in Nebraska and Maine). Then based on the  number of electors assigned to that region, we will sum up the number of electors affiliated to the presidential candidates. This sum divided by the 538 total electors would be the predicted probability that a presidential candidate would win in the upcoming election. \$10,000 will be spent on the cost of surveyors. The remaining \$5,000 from our budget will be used as contigency funds.
 
 ## Presentation of polling results
-We can map out the results to give a visual representation of how the votes mapped out to each state. @fig-hypotheticalvisualisation-1 provides a quick overview to an estimated presidential candidate preference in each state in America from the obtained samples. The colour distinction makes it quickly identifiable the majority within each state. @fig-hypotheticalvisualisation-2 provides the final predicted probability of how likely a party (presidential candidate) would be elected president. The following map utilises data obtained from Cook Political Report [@US2020mapdata]. Tigris library [@tigrisCitation] coupled with tidyverse library [@tidyverseReference] was used to generate the US map shown in @fig-hypotheticalvisualisation-1. Tidyverse library was also used to generate the bar chart shown in @fig-hypotheticalvisualisation-2.
+We can map out the results to give a visual representation of how the votes mapped out to each state. @fig-hypotheticalvisualisation-1 provides a quick overview to an estimated presidential candidate preference in each state in America from the obtained samples. The colour distinction makes it quickly identifiable the majority within each state. @fig-hypotheticalvisualisation-2 provides the final predicted probability of how likely a party (presidential candidate) would be elected president. The following map utilises data obtained from Cook Political Report [@US2020mapdata]. Tigris library [@tigrisCitation] coupled with tidyverse library [@tidyverseReference] was used to generate the US map shown in @fig-hypotheticalvisualisation-1. Tidyverse library was also used to generate the bar chart shown in @fig-hypotheticalvisualisation-2. 
 
 ```{r map of US votes}
 #| echo: false
@@ -347,6 +542,8 @@ hypothetical_outcome |>
 ```
 
 
+{{< pagebreak >}}
+
 # Model details {#sec-model-details}
 
 ## Posterior predictive checks
@@ -365,15 +562,6 @@ In @fig-ppcheckandposteriorvsprior-2 we compare the posterior with the prior. Th
 #| fig-cap: "Examining how the model fits, and is affected by, the data"
 #| fig-subcap: ["Posterior prediction check", "Comparing the posterior with the prior"]
 
-pp_check(first_model) +
-  theme_classic() +
-  theme(legend.position = "bottom")
-
-posterior_vs_prior(first_model) +
-  theme_minimal() +
-  scale_color_brewer(palette = "Set1") +
-  theme(legend.position = "bottom") +
-  coord_flip()
 ```
 
 ## Diagnostics
