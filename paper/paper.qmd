@@ -40,7 +40,7 @@ This report was written with the assistance of R @citeR. Additionally, @tidyvers
 
 The dataset provided by fivethirtyeight [@fivethirtyeight] contains over 15000 observations across 50 variables. Each observation is a poll conducted on the 2024 US Presidential Election. Fivethirtyeight's dataset was chosen due to it's comprehensive review of polls and pollsters, attributing grades in error and bias, as well as in transparency. Their thorough investigations ensure their dataset not only contains insightful polls, but also includes as much relevant information about the polls conducted as possible. This gives us plenty of predictors when building a model that will caluclate the percentage win of either Trump or Harris.
 
-The dataset was read into R [@citeR], and cleaned using the R package tidyverse [@tidyverse]. Due to Kamal's late entry into the race, some polls do not have any data on her specifically. This is why we set a cut-off date at 2024/07/21, the day Kamala replaced Joe Biden as the Democratic nominee.
+The dataset was read into R [@citeR], and cleaned using the R package tidyverse [@tidyverseReference]. Due to Kamal's late entry into the race, some polls do not have any data on her specifically. This is why we set a cut-off date at 2024/07/21, the day Kamala replaced Joe Biden as the Democratic nominee.
 
 Fivethirtyeight includes a metric called `numeric_grade`, which combines the transparency_score and transparency score. We only included polls with a `numeric_grade` at or above 2.5. This gave us the best balance between quantity and quality. Finally, we create 2 datasets, one with polls predicting a Harris win, the other a Trump win.
 
@@ -219,12 +219,13 @@ numeric_grade_trump_summary %>%
 
 ```
 
+{{< pagebreak >}}
+
 ### `pollster`
 
 Each poll is conducted by a pollster, who may make multiple polls leading up to the election. This may increase accuracy of their predictions, which is why it will be in our model.
 
-@fig_pollster-harris & @fig_pollster_trump show an interesting bump in predictions by George Mass. This may have been an error on their part however, as it is almost immediately rectified.
-
+@fig-pollster_harris & @fig-pollster_trump show an interesting bump in predictions by George Mass. This may have been an error on their part however, as it is almost immediately rectified.
 ```{r}
 #| label: fig-pollster_harris
 #| fig-cap: As election day draws close, pollsters are wrapping up their polls and posting their predictions on who will win. Each graph shows individual polls conducted in the months leading up to the election. They represent the change in prediciton for Kamala Harris winning the presidency.
@@ -238,7 +239,6 @@ base_plot_kamala +
   geom_smooth(color = "blue") +
   facet_wrap(vars(pollster))
 ```
-
 ```{r}
 #| label: fig-pollster_trump
 #| fig-cap: As election day draws close, pollsters are wrapping up their polls and posting their predictions on who will win. Each graph shows individual polls conducted in the months leading up to the election. They represent the change in prediciton for Donald Trump winning the presidency.  
@@ -253,11 +253,22 @@ base_plot_trump +
   facet_wrap(vars(pollster))
 ```
 
+
+
+
+
+
+
+
+
+
+
+{{< pagebreak >}}
 ### `states`
 
 The states each poll was conducted in. This is not one of our predictors for our model, but it can provide insight into what the prediction will be.
 
-@fig-state has Harris win 4 t 7 battleground states, but the margins are increadibly close and all it would take is for one of them to be incorrect to reverse the prediction.
+@fig-state has Harris win 4 t0 7 battleground states, but the margins are increadibly close and all it would take is for one of them to be incorrect to reverse the prediction.
 
 ```{r}
 #| label: fig-state
@@ -293,6 +304,10 @@ swing_states_plot +
 
 ```
 
+
+{{< pagebreak >}}
+
+
 ### `end_date`
 
 Every poll has a start and end date for querying its participants. Polls that are conducted closer to election day may be more reflective of American opinions as opposed to polls conducted in August or September. This is why we will be using this variable as one of our predictors in the model.
@@ -325,6 +340,8 @@ just_trump_high_quality %>%
   geom_histogram(fill = "red", alpha = 0.7, color = "black",)
 ```
 
+{{< pagebreak >}}
+
 ## Response
 
 ### `pct`
@@ -345,6 +362,21 @@ just_harris_high_quality %>%
   ggplot(mapping=aes(x = pct)) +
   geom_histogram(fill = "blue", alpha = 0.7, color = "black",)
 ```
+
+```{r}
+#| label: fig-pct_trump
+#| fig-cap: The distribution of predicted Trump vote percentage on election day.
+#| echo: false
+#| warning: false
+#| message: false
+
+#### Plot data ####
+just_trump_high_quality %>%
+  ggplot(mapping=aes(x = pct)) +
+  geom_histogram(fill = "red", alpha = 0.7, color = "black",)
+```
+
+{{< pagebreak >}}
 
 ```{r}
 #| label: tbl-pct_harris
@@ -370,19 +402,6 @@ pct_harris_summary %>%
 ```
 
 ```{r}
-#| label: fig-pct_trump
-#| fig-cap: The distribution of predicted Trump vote percentage on election day.
-#| echo: false
-#| warning: false
-#| message: false
-
-#### Plot data ####
-just_trump_high_quality %>%
-  ggplot(mapping=aes(x = pct)) +
-  geom_histogram(fill = "red", alpha = 0.7, color = "black",)
-```
-
-```{r}
 #| label: tbl-pct_trump
 #| tbl-cap: Summary of percentage vote predictions for Donald Trump.
 #| echo: false
@@ -404,6 +423,7 @@ pct_trump_summary %>%
   kable_styling()
 
 ```
+
 
 # Measurement
 
@@ -654,10 +674,13 @@ Our modeling approach leverages multiple linear regression to capture the relati
 The primary goal is to understand how support evolves over time and how it is influenced by the quality and methodology of the polling process. Despite some limitations, the models provide a useful framework for analyzing polling data, and future iterations could explore more sophisticated approaches such as Bayesian modeling or hierarchical random effects to improve robustness.
 
 # Results
+## Key Metrics for Model 1
 
-Our results are summarized in @tbl-modelresults.
+@tbl-keymetrics-model1 presents the key metrics for Model 1, which served as a baseline analysis for polling percentages for Kamala Harris and Donald Trump. The R-squared values are relatively low for both candidates, at 0.07 for Harris and 0.14 for Trump, indicating that this simple model explained only a small proportion of the variance in polling percentages. The AIC values were 4926.19 and 5053.99 for Harris and Trump respectively, with similar RMSE values around 4, suggesting limited predictive power. This baseline model was used to establish a simple trend before moving to a more comprehensive model that accounts for additional variability.
+
 
 ```{r}
+#| label: tbl-keymetrics-model1
 #| echo: false
 #| eval: true
 #| warning: false
@@ -705,14 +728,24 @@ metrics_model_1 <- tibble(
 knitr::kable(metrics_model_1, caption = "Key Metrics for Harris's and Trump's Model 1")
 
 ```
-## Key Metrics for Model 1
 
-Table 5 presents the key metrics for Model 1, which served as a baseline analysis for polling percentages for Kamala Harris and Donald Trump. The R-squared values are relatively low for both candidates, at 0.07 for Harris and 0.14 for Trump, indicating that this simple model explained only a small proportion of the variance in polling percentages. The AIC values were 4926.19 and 5053.99 for Harris and Trump respectively, with similar RMSE values around 4, suggesting limited predictive power. This baseline model was used to establish a simple trend before moving to a more comprehensive model that accounts for additional variability.
+
+
+
+
+## Significant Predictors in Model 2
+
+@tbl-summarystatistics-trump and @tbl-summarystatistics-kamala present the summary statistics for Model 2 for Donald Trump and Kamala Harris respectively. The second model extends the baseline model by including pollster-specific effects, which significantly improves its predictive capabilities.
+
+For Donald Trump, significant predictors include end_date (estimate = 0.0206, p < 0.001), which shows that his polling percentage tends to increase slightly over time. Specific pollsters like Ipsos (estimate = 5.39, p < 0.001) and MassINC Polling Group (estimate = 8.88, p < 0.001) show considerable effects, indicating variability in results due to the polling organization.
+
+For Kamala Harris, end_date is also significant (estimate = 0.0129, p = 0.0015), suggesting a positive trend over time. Notable pollster effects include MassINC Polling Group (estimate = 7.70, p < 0.001) and University of Maryland/Washington Post (estimate = 14.62, p < 0.001), indicating significant variability in the polling results reported by different organizations.
+
+
 ```{r}
 #| echo: false
 #| eval: true
-#| label: Summary Statistics for Donald Trump
-#| tbl-cap: "Summary Statistics for Donald Trump"
+#| label: tbl-summarystatistics-trump
 #| warning: false
 library(modelsummary)
 library(knitr)
@@ -727,8 +760,7 @@ knitr::kable(significant_trump_model_2, caption = "Significant Predictors in Tru
 ```{r}
 #| echo: false
 #| eval: true
-#| label: Summary Statistics for Kamala Harris
-#| tbl-cap: "Summary Statistics for Kamala Harris"
+#| label: tbl-summarystatistics-kamala
 #| warning: false
 library(modelsummary)
 library(knitr)
@@ -740,18 +772,18 @@ significant_harris_model_2 <- as.data.frame(summary_harris_model_2$coefficients)
 knitr::kable(significant_harris_model_2, caption = "Significant Predictors in Harris's Model 2")
 ```
 
-## Significant Predictors in Model 2
 
-Table 6 and Table 7 present the summary statistics for Model 2 for Donald Trump and Kamala Harris respectively. The second model extends the baseline model by including pollster-specific effects, which significantly improves its predictive capabilities.
+## Visual Representation of Model Predictions
 
-For Donald Trump, significant predictors include end_date (estimate = 0.0206, p < 0.001), which shows that his polling percentage tends to increase slightly over time. Specific pollsters like Ipsos (estimate = 5.39, p < 0.001) and MassINC Polling Group (estimate = 8.88, p < 0.001) show considerable effects, indicating variability in results due to the polling organization.
+@fig-prediction-outcome and @fig-prediction-outcome-smooth depict the predicted polling percentages for both candidates over time based on Model 2. The solid lines represent the smoothed predictions for Kamala Harris (blue) and Donald Trump (red). The visualizations reveal that both candidates maintain relatively stable trends, with some fluctuation, particularly influenced by pollsters and specific dates.
 
-For Kamala Harris, end_date is also significant (estimate = 0.0129, p = 0.0015), suggesting a positive trend over time. Notable pollster effects include MassINC Polling Group (estimate = 7.70, p < 0.001) and University of Maryland/Washington Post (estimate = 14.62, p < 0.001), indicating significant variability in the polling results reported by different organizations.
+@fig-prediction-outcome-smooth indicates that Kamala Harris tends to have a slightly higher polling percentage compared to Donald Trump, with less fluctuation over the observed period. This suggests that her polling results are more consistent across different pollsters and dates.
+
 
 ```{r}
 #| echo: false
 #| eval: true
-#| label: Polling Prediction Outcome
+#| label: fig-prediction-outcome
 #| tbl-cap: "Polling prediction Outcome"
 #| warning: false
 # Plot model predictions for Trump
@@ -779,13 +811,21 @@ ggplot(combined_data_with_preds, aes(x = end_date, y = pct)) +
   labs(
     x = "Polling End Date ",
     y = "Polling Percentage",
-    title = "Polling Predictions for Kamala Harris and Donald Trump",
+    title = "Polling Predictions for Harris and  Trump",
     color = "Candidate"
   ) +
   theme_minimal() +
   theme(legend.position = "bottom")
 
 # Plotting the smoothed predictions for both Trump and Harris
+```
+
+```{r}
+#| echo: false
+#| eval: true
+#| label: fig-prediction-outcome-smooth
+#| tbl-cap: "Polling prediction Outcome"
+#| warning: false
 ggplot(combined_data_with_preds, aes(x = end_date, y = pct)) +
   # Actual data points with transparency
   geom_point(aes(color = candidate), alpha = 0.3) +
@@ -800,18 +840,14 @@ ggplot(combined_data_with_preds, aes(x = end_date, y = pct)) +
   labs(
     x = "Polling End Date",
     y = "Polling Percentage",
-    title = "Smoothed Polling Predictions for Kamala Harris and Donald Trump",
+    title = "Smoothed Polling Predictions for Harris and Trump",
     color = "Candidate"
   ) +
   theme_minimal() +
   theme(legend.position = "bottom")
 ```
 
-## Visual Representation of Model Predictions
-
-Figure 1 and Figure 2 depict the predicted polling percentages for both candidates over time based on Model 2. The solid lines represent the smoothed predictions for Kamala Harris (blue) and Donald Trump (red). The visualizations reveal that both candidates maintain relatively stable trends, with some fluctuation, particularly influenced by pollsters and specific dates.
-
-The smoothed polling predictions in Figure 2 indicate that Kamala Harris tends to have a slightly higher polling percentage compared to Donald Trump, with less fluctuation over the observed period. This suggests that her polling results are more consistent across different pollsters and dates.
+{{< pagebreak >}}
 
 ## Summary
 
@@ -825,7 +861,7 @@ This paper provides a forecast for the 2024 U.S. Presidential Election between K
 
 Model 1, which included basic predictors like end date, transparency score, and numeric grade, demonstrated limited explanatory power, with R-squared values of 0.07 for Harris and 0.14 for Trump. However, Model 2, which introduced pollster-specific effects, provided better insights into the variability in polling percentages.
 
-The smoothed polling predictions (Figure 2) clearly showed that Harris is ahead of Trump throughout the analyzed period. This consistent lead, combined with higher polling percentages reported by major polling organizations such as MassINC Polling Group and University of Maryland/Washington Post, indicates Harris’s current advantage heading toward the election.
+The smoothed polling predictions in @fig-prediction-outcome-smooth clearly showed that Harris is ahead of Trump throughout the analyzed period. This consistent lead, combined with higher polling percentages reported by major polling organizations such as MassINC Polling Group and University of Maryland/Washington Post, indicates Harris’s current advantage heading toward the election.
 
 ## Pollster Impact and Voter Sentiment
 
@@ -1111,48 +1147,6 @@ hypothetical_outcome |>
 
 
 {{< pagebreak >}}
-
-# Model details {#sec-model-details}
-
-## Posterior predictive checks
-
-In @fig-ppcheckandposteriorvsprior-1 we implement a posterior predictive check. This shows...
-
-In @fig-ppcheckandposteriorvsprior-2 we compare the posterior with the prior. This shows... 
-
-```{r}
-#| eval: true
-#| echo: false
-#| message: false
-#| warning: false
-#| label: fig-ppcheckandposteriorvsprior
-#| layout-ncol: 2
-#| fig-cap: "Examining how the model fits, and is affected by, the data"
-#| fig-subcap: ["Posterior prediction check", "Comparing the posterior with the prior"]
-
-```
-
-## Diagnostics
-
-@fig-stanareyouokay-1 is a trace plot. It shows... This suggests...
-
-@fig-stanareyouokay-2 is a Rhat plot. It shows... This suggests...
-
-```{r}
-#| echo: false
-#| eval: true
-#| message: false
-#| warning: false
-#| label: fig-stanareyouokay
-#| fig-cap: "Checking the convergence of the MCMC algorithm"
-#| fig-subcap: ["Trace plot", "Rhat plot"]
-#| layout-ncol: 2
-
-#plot(first_model, "trace")
-
-#plot(first_model, "rhat")
-```
-
 
 
 \newpage
