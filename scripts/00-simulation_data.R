@@ -1,45 +1,19 @@
 #### Preamble ####
-# Purpose: Tests the structure and validity of the simulated US election pollster data
+# Purpose: Simulates a dataset of polls and relevant information about them
 # Author: Prankit Bhardwaj, Veyasan Ragulan, Chris Yong Hong Sen
 # Date: 4 November 2024
 # Contact: prankit.bhardwaj@mail.utoronto.ca 
 # License: MIT
-# Pre-requisites: Requires simulated election polling data in the "data/00-simulated_data/" directory.
-
 
 #### Workspace setup ####
 library(tidyverse)
 library(arrow)
-
-analysis_data <- read_parquet("data/00-simulated_data/simulated_data.parquet")
-
-# Test if the data was successfully loaded
-if (exists("analysis_data")) {
-  message("Test Passed: The dataset was successfully loaded.")
-} else {
-  stop("Test Failed: The dataset could not be loaded.")
-}
+set.seed(304)
 
 
-#### Test data ####
-
-# Check if the dataset has 151 rows
-if (nrow(analysis_data) == 1000) {
-  message("Test Passed: The dataset has 151 rows.")
-} else {
-  stop("Test Failed: The dataset does not have 151 rows.")
-}
-
-# Check if the dataset has 6 columns
-if (ncol(analysis_data) == 6) {
-  message("Test Passed: The dataset has 3 columns.")
-} else {
-  stop("Test Failed: The dataset does not have 3 columns.")
-}
-
-
-# Check if the 'state' column contains only valid Australian state names
-valid_states <- c(
+#### Simulate data ####
+# State names
+states <- c(
   "Alabama",
   "Alaska",
   "Arizona",
@@ -91,15 +65,8 @@ valid_states <- c(
   "Wyoming"
 )
 
-if (all(analysis_data$state %in% valid_states)) {
-  message("Test Passed: The 'state' column contains only valid American state names.")
-} else {
-  stop("Test Failed: The 'state' column contains invalid state names.")
-}
-
-# Check if the 'party' column contains only valid party names
-valid_pollsters <- c(
-  "Labor",
+# Pollsters
+pollsters <- c(
   "TIPP",                                                           
   "YouGov",                                                         
   "RMG Research",                                                   
@@ -321,24 +288,52 @@ valid_pollsters <- c(
   "NewsNation/Decision Desk HQ",                                    
   "The Political Matrix/The Listener Group",                        
   "Cor Services, Inc."  
-)
+  )
 
-if (all(analysis_data$pollster %in% valid_pollsters)) {
-  message("Test Passed: The 'pollsters' column contains only valid party names.")
-} else {
-  stop("Test Failed: The 'pollsters' column contains invalid party names.")
-}
+# Create a dataset by randomly assigning states and parties to divisions
+simulation_data <- tibble(
+  state = sample(
+    states,
+    size = 1000,
+    replace = TRUE 
+  ),
+  pollster = sample(
+    pollsters,
+    size = 1000,
+    replace = TRUE,
+    
+  ),
+  transparency_score = sample(
+    0.0:10.0,
+    size = 1000,
+    replace = TRUE
+  ),
+  numeric_grade = sample(
+    0.0:3.0,
+    size = 1000,
+    replace = TRUE
+  ),
+  pct = sample(
+    0.0:100.0,
+    size = 1000,
+    replace = T
+  ),
+  candidate = sample(
+    c("Kamala Harris",
+      "Donald Trump"),
+    size = 1000,
+    replace  = TRUE
+  ),
+  end_date = sample(
+    seq(as.Date('2024/07/21'), 
+        as.Date('2024/11/02'), 
+        by="day"), 
+    size = 1000,
+    replace = TRUE
+    )
+  )
+  
 
-# Check if there are any missing values in the dataset
-if (all(!is.na(analysis_data))) {
-  message("Test Passed: The dataset contains no missing values.")
-} else {
-  stop("Test Failed: The dataset contains missing values.")
-}
 
-# Check if there are no empty strings in 'division', 'state', and 'party' columns
-if (all(analysis_data$pollster != "" & analysis_data$state != "")) {
-  message("Test Passed: There are no empty strings in 'division', 'state', or 'party'.")
-} else {
-  stop("Test Failed: There are empty strings in one or more columns.")
-}
+#### Save data ####
+write_parquet(simulation_data, "data/00-simulated_data/simulated_data.parquet")
