@@ -10,7 +10,7 @@ This repo provides polling outcomes for the 2024 US presidential elections. Our 
 
 The repo is structured as:
 
--   `data/raw_data` contains the raw data as obtained from X.
+-   `data/raw_data` contains the raw data as obtained from [FiveThirtyEight](https://projects.fivethirtyeight.com/poll/), a project under [ABC news](https://abcnews.go.com/) which provides a collection of historical election and polling data across various pollsters, including actual election data from previous presidential elections.
 -   `data/analysis_data` contains the cleaned dataset that was constructed.
 -   `model` contains fitted models. 
 -   `other` contains details about LLM chat interactions and sketches.
